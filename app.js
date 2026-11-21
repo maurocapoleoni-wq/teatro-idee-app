@@ -308,7 +308,7 @@ let pagina = 0;
 function disegnaLista() {
   const q = $('cerca').value.trim().toLowerCase();
   const f = $('filtro-opera').value;
-  const tutte = idee();
+  const tutte = idee().filter((n) => statoDi(n.nome) !== 'cancellata');
   const elenco = tutte.filter((n) => (f === '*' || n.opera === f)
     && (!q || testoDi(n).toLowerCase().includes(q) || osservazioniDi(n.nome).some((o) => o.corpo.toLowerCase().includes(q))));
   const ul = $('lista');
@@ -499,7 +499,7 @@ function vista(nome) {
   fermaDettatura();
   for (const v of ['lista', 'nuova', 'dettaglio', 'sinossi', 'impostazioni']) $('vista-' + v).hidden = v !== nome;
   if (nome === 'lista') disegnaLista();
-  if (nome === 'impostazioni') { $('chiave').value = memoria.chiave; $('archivio').value = memoria.archivio; mostra('esito-frequenza', ''); disegnaFrequenza(); }
+  if (nome === 'impostazioni') { $('chiave').value = memoria.chiave; $('archivio').value = memoria.archivio; mostra('esito-frequenza', ''); disegnaFrequenza(); mostra('esito-cancellate', ''); disegnaCancellate(); }
   if (nome === 'nuova') { mostra('esito', ''); setTimeout(() => $('testo').focus(), 50); }
   if (nome === 'dettaglio') { requestAnimationFrame(scorriInFondo); mostra('oss-esito', ''); $('oss-testo').value = leggi('bozza-oss-' + ideaAperta, ''); }
   window.scrollTo(0, 0);
@@ -583,18 +583,57 @@ document.querySelectorAll('#dett-stato button').forEach((b) => b.addEventListene
   if (!collegata()) { mostra('oss-esito', "Prima collega l'archivio con la chiave.", 'errore'); return; }
   if (idea.cartella === 'coda') { mostra('oss-esito', "L'idea non è ancora arrivata nell'archivio: riprova quando torna la rete.", 'errore'); return; }
   if (s === 'a-posto' && !confirm("Tutto a posto? Lo spettatore smette di fare domande e l'idea è pronta per il PC. Potrai sempre riaprirla.")) return;
-  const t = adesso();
   mostra('oss-esito', 'Salvo…', 'tenue');
   try {
-    const contenuto = ['riferita_a: ' + idea.nome, 'stato: ' + s, 'fonte: app', `data: ${t.giorno} ${t.ora}`, ''].join('\n');
-    await creaFile({ nome: `${t.giorno}-${t.compatta}-stato.md`, contenuto }, 'spettatore/stato', "Stato dell'idea dal telefono");
-    scrivi('stati', { ...leggi('stati', {}), [idea.nome]: s });
+    await salvaStato(idea.nome, s);
     disegnaTutto();
     mostra('oss-esito', s === 'a-posto' ? 'Fatto ✓ Idea chiusa: è pronta per il PC.' : 'Fatto ✓ Vale dal prossimo passaggio.', 'ok');
   } catch {
     mostra('oss-esito', navigator.onLine ? 'Non sono riuscito a salvare: controlla la chiave.' : 'Serve la rete per cambiare lo stato.', 'errore');
   }
 }));
+
+async function salvaStato(nome, s) {
+  const t = adesso();
+  const contenuto = ['riferita_a: ' + nome, 'stato: ' + s, 'fonte: app', `data: ${t.giorno} ${t.ora}`, ''].join('\n');
+  await creaFile({ nome: `${t.giorno}-${t.compatta}-stato.md`, contenuto }, 'spettatore/stato', "Stato dell'idea dal telefono");
+  scrivi('stati', { ...leggi('stati', {}), [nome]: s });
+}
+
+// ---------- Cestino ----------
+// Cancellare un'idea non toglie il file: scrive lo stato «cancellata». L'idea sparisce dall'app,
+// lo spettatore e Raccogli la ignorano, e si può ripristinare dalle impostazioni.
+$('dett-cestino').addEventListener('click', async () => {
+  const idea = idee().find((x) => x.nome === ideaAperta);
+  if (!idea) return;
+  if (!collegata()) { mostra('oss-esito', "Prima collega l'archivio con la chiave.", 'errore'); return; }
+  if (idea.cartella === 'coda') { mostra('oss-esito', "L'idea non è ancora arrivata nell'archivio: riprova quando torna la rete.", 'errore'); return; }
+  if (!confirm("Vuoi davvero cancellare questa idea?\n\nSparisce dall'app e lo spettatore non ci lavora più. Il testo resta salvato nell'archivio: puoi ripristinarla da Impostazioni ⚙︎ → Idee cancellate.")) return;
+  mostra('oss-esito', 'Cancello…', 'tenue');
+  try {
+    await salvaStato(idea.nome, 'cancellata');
+    vista('lista');
+    mostra('stato-lista', 'Idea cancellata ✓ La ritrovi in Impostazioni.', 'ok centro');
+    setTimeout(() => mostra('stato-lista', '', ''), 4000);
+  } catch {
+    mostra('oss-esito', navigator.onLine ? 'Non sono riuscito a cancellare: controlla la chiave.' : 'Serve la rete per cancellare.', 'errore');
+  }
+});
+function disegnaCancellate() {
+  const via = idee().filter((n) => statoDi(n.nome) === 'cancellata');
+  $('titolo-cancellate').hidden = !via.length;
+  $('cancellate').replaceChildren(...via.map((n) => {
+    const li = el('li', 'cancellata');
+    const b = el('button', 'ripristina', 'Ripristina');
+    b.addEventListener('click', async () => {
+      b.disabled = true;
+      try { await salvaStato(n.nome, 'spettatore'); disegnaCancellate(); disegnaLista(); mostra('esito-cancellate', 'Idea ripristinata ✓', 'ok'); }
+      catch { b.disabled = false; mostra('esito-cancellate', 'Non sono riuscito: controlla la rete.', 'errore'); }
+    });
+    li.append(el('span', 'testo', testoDi(n)), b);
+    return li;
+  }));
+}
 
 // ---------- Ogni quanto passa lo spettatore ----------
 // La scelta si scrive nell'archivio come file nuovo in spettatore/frequenza/: la routine legge il più recente.

@@ -275,3 +275,10 @@ main.sinossi { flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 1
 .modifica-tasti { display: flex; gap: 8px; }
 .modifica-tasti button { margin-top: 6px; padding: 9px 12px; }
 .modifica-tasti .principale { font-size: 17px; }
+
+/* ---- v27: cestino e idee cancellate ---- */
+.modifica-testata.cestino { margin-left: 4px; }
+.cancellate { list-style: none; padding: 0; margin: 0; }
+.cancellate li { display: flex; align-items: center; gap: 10px; padding: 8px 10px; margin-bottom: 6px; border: 1px solid var(--bordo); border-radius: 10px; background: var(--carta); }
+.cancellate .testo { flex: 1; min-width: 0; font-size: 14px; color: var(--tenue); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.cancellate .ripristina { width: auto; margin: 0; padding: 7px 12px; font-size: 14px; flex: none; }
