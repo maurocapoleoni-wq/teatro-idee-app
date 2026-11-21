@@ -227,8 +227,8 @@ main.dett .osservazioni { flex: 1; min-height: 0; overflow-y: auto; overscroll-b
 #vista-lista .pagine { margin-top: 0; }
 html:has(#vista-lista:not([hidden])), body:has(#vista-lista:not([hidden])) { overflow: hidden; height: 100%; }
 
-/* ---- v17-21: circa 5 mm in più tra un'idea e l'altra ---- */
-#vista-lista .lista { gap: 26px; }
+/* ---- v17-22: circa 6 mm in più tra un'idea e l'altra, 2 mm sopra la prima ---- */
+#vista-lista .lista { gap: 30px; padding-top: 8px; }
 
 /* ---- v19: Precedenti/Altre fissi in fondo allo schermo ---- */
 #vista-lista .pagine { margin-top: auto; }
@@ -236,3 +236,11 @@ html:has(#vista-lista:not([hidden])), body:has(#vista-lista:not([hidden])) { ove
 /* ---- v21: Precedenti verde fluorescente, Altre blu fluorescente ---- */
 #pag-prima { color: #39ff14; border-color: #39ff14; font-weight: 700; }
 #pag-dopo { color: #1fd1ff; border-color: #1fd1ff; font-weight: 700; }
+/* telefoni bassi: le schede usano anche lo spazio sopra i pulsanti, così niente viene tagliato */
+@media (max-height: 720px) { #vista-lista .lista { flex: 1 1 0; } }
+/* copertina compatta anche sui telefoni medi, così il nome dell'opera si legge intero */
+@media (max-height: 900px) {
+  #vista-lista .copertina { padding: 4px; gap: 2px; }
+  #vista-lista .copertina .maschera { display: none; }
+  #vista-lista .copertina .locandina { font-size: 14px; -webkit-line-clamp: 2; }
+}
