@@ -178,13 +178,24 @@ async function caricaNote() {
 // ---------- Suono quando arrivano domande nuove ----------
 // Si sente solo con l'app aperta: a ogni aggiornamento confronta i giri con quelli già visti.
 // Spettatore: due note che salgono. Drammaturgo: tre note più gravi.
-let audio = null;
+// Se il telefono non lascia suonare prima di un tocco, il suono parte al primo tocco.
+let audio = null, suonoInAttesa = null;
 function sbloccaAudio() {
-  try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); if (audio.state === 'suspended') audio.resume(); } catch { /* niente audio */ }
+  try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); if (audio.state === 'suspended') return audio.resume(); } catch { /* niente audio */ }
+  return Promise.resolve();
 }
-document.addEventListener('pointerdown', sbloccaAudio, { passive: true });
+document.addEventListener('pointerdown', () => {
+  sbloccaAudio().then(() => { if (suonoInAttesa !== null) { const d = suonoInAttesa; suonoInAttesa = null; suona(d); } });
+}, { passive: true });
 function suona(dramm) {
-  sbloccaAudio(); if (!audio) return;
+  const p = sbloccaAudio(); if (!audio) return;
+  if (audio.state === 'running') { suonaOra(dramm); return; }
+  suonoInAttesa = dramm;
+  Promise.race([p, new Promise((r) => setTimeout(r, 400))]).then(() => {
+    if (audio.state === 'running' && suonoInAttesa !== null) { suonoInAttesa = null; suonaOra(dramm); }
+  });
+}
+function suonaOra(dramm) {
   const note = dramm ? [392, 523.25, 659.25] : [659.25, 987.77];
   note.forEach((f, i) => {
     const t = audio.currentTime + i * 0.18, o = audio.createOscillator(), g = audio.createGain();
@@ -194,11 +205,33 @@ function suona(dramm) {
   });
   if (navigator.vibrate) navigator.vibrate(dramm ? [80, 60, 80, 60, 80] : [80, 60, 80]);
 }
+// Domande non ancora lette: giri (e bozze) che l'autore non ha ancora aperto.
+// La prima volta contano come non lette solo le domande che aspettano ancora una risposta.
+function nonLetti(nome) {
+  const letti = leggi('giri-letti', []);
+  return note.filter((n) => n.riferita === nome && n.cartella === 'spettatore' && !letti.includes(n.nome));
+}
+function segnaLetti(nome) {
+  const letti = new Set(leggi('giri-letti', []));
+  note.filter((n) => n.riferita === nome && n.cartella === 'spettatore').forEach((n) => letti.add(n.nome));
+  scrivi('giri-letti', [...letti]);
+}
+let avvioSuonato = false;
 function avvisaDomandeNuove() {
   const giri = note.filter((n) => n.cartella === 'spettatore');
+  if (leggi('giri-letti', null) === null) {
+    scrivi('giri-letti', giri.filter((g) => { const d = dialogoDi(g.riferita); return d[d.length - 1] !== g; }).map((g) => g.nome));
+  }
   const visti = leggi('giri-visti', null);
   scrivi('giri-visti', giri.map((n) => n.nome));
-  if (visti === null) return; // prima volta su questo telefono: niente suono per i giri vecchi
+  // All'apertura: suona se c'è almeno un'icona rossa.
+  if (!avvioSuonato) {
+    avvioSuonato = true;
+    const rossi = giri.filter((g) => nonLetti(g.riferita).includes(g));
+    if (rossi.length) { suona(rossi.some(eDrammaturgo)); return; }
+  }
+  if (visti === null) return;
+  // Con l'app già aperta: suona per i giri arrivati dopo l'ultimo controllo.
   const nuovi = giri.filter((n) => !visti.includes(n.nome));
   if (nuovi.length) suona(nuovi.some(eDrammaturgo));
 }
@@ -294,9 +327,10 @@ function disegnaLista() {
     const fase = FASI[statoDi(n.nome)] || FASI.spettatore;
     cop.append(el('span', 'maschera', fase.icona), el('span', 'locandina', n.opera ? nomeOpera(n.opera) : 'Opera attiva'),
       el('span', 'fase fase-' + statoDi(n.nome), fase.nome));
-    const no = osservazioniDi(n.nome).length;
+    const no = dialogoDi(n.nome).length;
     const info0 = [];
-    if (no) cop.append(el('span', 'contatore', `💬 ${no}`));
+    // 💬 grigio: niente di nuovo. Rosso: sono arrivate domande che non hai ancora aperto.
+    if (no) cop.append(el('span', 'contatore' + (nonLetti(n.nome).length ? ' nuove' : ''), `💬 ${no}`));
     const chiede = statoDi(n.nome) === 'a-posto' ? null : attendeRisposta(n.nome);
     if (statoDi(n.nome) === 'a-posto') info0.push(el('span', 'badge integrata', '✓ tutto a posto'));
     if (chiede) info0.push(el('span', 'badge domande' + (chiede === 'drammaturgo' ? ' dramm' : ''), chiede === 'drammaturgo' ? '❓ il drammaturgo chiede' : '❓ lo spettatore chiede'));
@@ -342,6 +376,7 @@ function apriDettaglio(nome) {
 function disegnaDettaglio() {
   const n = idee().find((x) => x.nome === ideaAperta);
   if (!n) { vista('lista'); return; }
+  segnaLetti(n.nome); // ciò che vedi qui conta come letto
   // In testata solo la data (e il nome dell'opera, se è stata scelta): niente riquadro colorato.
   $('dett-titolo').textContent = (n.opera ? nomeOpera(n.opera) + ' · ' : '') + dataBreve(n.data);
   $('dett-nota').textContent = n.cartella === 'archivio' ? 'integrata nella wiki' : n.cartella === 'coda' ? 'in attesa di rete' : '';
@@ -424,6 +459,7 @@ function disegnaTutto() {
 function vista(nome) {
   fermaDettatura();
   for (const v of ['lista', 'nuova', 'dettaglio', 'sinossi', 'impostazioni']) $('vista-' + v).hidden = v !== nome;
+  if (nome === 'lista') disegnaLista();
   if (nome === 'impostazioni') { $('chiave').value = memoria.chiave; $('archivio').value = memoria.archivio; mostra('esito-frequenza', ''); disegnaFrequenza(); }
   if (nome === 'nuova') { mostra('esito', ''); setTimeout(() => $('testo').focus(), 50); }
   if (nome === 'dettaglio') { requestAnimationFrame(scorriInFondo); mostra('oss-esito', ''); $('oss-testo').value = leggi('bozza-oss-' + ideaAperta, ''); }
