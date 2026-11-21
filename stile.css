@@ -227,8 +227,12 @@ main.dett .osservazioni { flex: 1; min-height: 0; overflow-y: auto; overscroll-b
 #vista-lista .pagine { margin-top: 0; }
 html:has(#vista-lista:not([hidden])), body:has(#vista-lista:not([hidden])) { overflow: hidden; height: 100%; }
 
-/* ---- v17-20: circa 3 mm in più tra un'idea e l'altra ---- */
-#vista-lista .lista { gap: 18px; }
+/* ---- v17-21: circa 5 mm in più tra un'idea e l'altra ---- */
+#vista-lista .lista { gap: 26px; }
 
 /* ---- v19: Precedenti/Altre fissi in fondo allo schermo ---- */
 #vista-lista .pagine { margin-top: auto; }
+
+/* ---- v21: Precedenti verde fluorescente, Altre blu fluorescente ---- */
+#pag-prima { color: #39ff14; border-color: #39ff14; font-weight: 700; }
+#pag-dopo { color: #1fd1ff; border-color: #1fd1ff; font-weight: 700; }
