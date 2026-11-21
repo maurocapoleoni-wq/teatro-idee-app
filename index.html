@@ -56,10 +56,19 @@
       <button class="icona indietro" aria-label="Indietro">‹</button>
       <h1 id="dett-titolo" class="titolo-piccolo">Idea</h1>
       <span id="dett-nota" class="nota-testata"></span>
+      <button id="dett-modifica-apri" class="modifica-testata" aria-label="Modifica il testo">✏️</button>
       <button id="dett-sinossi" class="sinossi-testata" aria-label="Sinossi fin qui">📜 Sinossi</button>
     </header>
     <main class="dett">
       <article id="dett-testo" class="dett-testo"></article>
+      <div id="dett-modifica-box" class="modifica-box" hidden>
+        <textarea id="dett-modifica" data-detta rows="6" aria-label="Testo dell'idea"></textarea>
+        <p class="tenue piccolo">L'originale resta salvato: la modifica diventa una versione nuova.</p>
+        <div class="modifica-tasti">
+          <button id="dett-annulla">Annulla</button>
+          <button id="dett-salva" class="principale">Salva</button>
+        </div>
+      </div>
       <h2 id="dett-titolo-oss">Osservazioni</h2>
       <ul id="dett-osservazioni" class="osservazioni"></ul>
     </main>
@@ -120,7 +129,7 @@
       </div>
       <p id="esito-frequenza" class="esito" role="status" aria-live="polite"></p>
       <button id="dimentica" class="pericolo">Togli la chiave da questo telefono</button>
-      <p class="tenue centro">Versione dell'app: 25</p>
+      <p class="tenue centro">Versione dell'app: 26</p>
     </main>
   </section>
 

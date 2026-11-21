@@ -263,3 +263,15 @@ main.sinossi { flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 1
 
 /* ---- v25: 💬 rosso quando ci sono domande nuove non ancora aperte ---- */
 .copertina .contatore.nuove { background: #e0142b; color: #fff; font-weight: 700; box-shadow: 0 0 0 2px rgba(255,255,255,.85); }
+
+/* ---- v26: modifica a mano del testo dell'idea ---- */
+.modifica-testata {
+  width: auto; margin: 0 0 0 6px; padding: 5px 10px; border-radius: 18px; flex: none;
+  background: transparent; border: 1px solid var(--bordo); color: #fff; font-size: 15px;
+}
+.modifica-box { flex: none; margin-bottom: 6px; }
+.modifica-box textarea { max-height: 34vh; font-size: 17px; }
+.modifica-box .piccolo { font-size: 12.5px; margin: 4px 0 0; }
+.modifica-tasti { display: flex; gap: 8px; }
+.modifica-tasti button { margin-top: 6px; padding: 9px 12px; }
+.modifica-tasti .principale { font-size: 17px; }

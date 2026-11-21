@@ -74,7 +74,7 @@ function analizza(nome, testo, cartella) {
   const corpo = righe.slice(i).join('\n').trim();
   const m = nome.match(/^(\d{4})-(\d{2})-(\d{2})-(\d{2})(\d{2})/);
   const data = testa.data || (m ? `${m[1]}-${m[2]}-${m[3]} ${m[4]}:${m[5]}` : nome.slice(0, 10));
-  return { nome, cartella, opera: testa.opera || '', riferita: testa.riferita_a || '', giro: testa.giro || '', autore: testa.autore || '', bozza: testa.bozza || '', data, corpo };
+  return { nome, cartella, opera: testa.opera || '', riferita: testa.riferita_a || '', giro: testa.giro || '', autore: testa.autore || '', bozza: testa.bozza || '', tipo: testa.tipo || '', data, corpo };
 }
 
 // Crea il file senza mai sovrascrivere: se il nome esiste già, aggiunge -2, -3…
@@ -270,9 +270,16 @@ function idee() {
     .map((n) => ({ ...analizza(n.nome, n.contenuto, 'coda') }));
   return [...inCoda, ...note.filter((n) => !n.riferita)].sort((a, b) => b.nome.localeCompare(a.nome));
 }
+// Versioni del testo: quando l'autore modifica un'idea nasce un file nuovo (tipo: versione);
+// l'originale resta intatto e vale il testo della versione più recente.
+function versioniDi(nome) {
+  const inCoda = memoria.coda.map((n) => analizza(n.nome, n.contenuto, 'coda')).filter((n) => n.riferita === nome && n.tipo === 'versione');
+  return [...note.filter((n) => n.riferita === nome && n.tipo === 'versione'), ...inCoda].sort((a, b) => a.nome.localeCompare(b.nome));
+}
+function testoDi(n) { const v = versioniDi(n.nome).pop(); return v ? v.corpo : n.corpo; }
 function osservazioniDi(nome) {
-  const inCoda = memoria.coda.map((n) => analizza(n.nome, n.contenuto, 'coda')).filter((n) => n.riferita === nome);
-  return [...note.filter((n) => n.riferita === nome && n.cartella !== 'spettatore'), ...inCoda].sort((a, b) => a.nome.localeCompare(b.nome));
+  const inCoda = memoria.coda.map((n) => analizza(n.nome, n.contenuto, 'coda')).filter((n) => n.riferita === nome && n.tipo !== 'versione');
+  return [...note.filter((n) => n.riferita === nome && n.cartella !== 'spettatore' && n.tipo !== 'versione'), ...inCoda].sort((a, b) => a.nome.localeCompare(b.nome));
 }
 function domandeDi(nome) { return note.filter((n) => n.riferita === nome && n.cartella === 'spettatore' && !n.bozza); }
 function bozzeDi(nome) { return note.filter((n) => n.riferita === nome && n.bozza).sort((a, b) => (+a.bozza) - (+b.bozza)); }
@@ -303,7 +310,7 @@ function disegnaLista() {
   const f = $('filtro-opera').value;
   const tutte = idee();
   const elenco = tutte.filter((n) => (f === '*' || n.opera === f)
-    && (!q || n.corpo.toLowerCase().includes(q) || osservazioniDi(n.nome).some((o) => o.corpo.toLowerCase().includes(q))));
+    && (!q || testoDi(n).toLowerCase().includes(q) || osservazioniDi(n.nome).some((o) => o.corpo.toLowerCase().includes(q))));
   const ul = $('lista');
   $('pagine').hidden = true;
   if (!collegata() && !tutte.length) { ul.replaceChildren(el('li', 'tenue centro', 'Collega l\'archivio dalle impostazioni ⚙︎')); return; }
@@ -335,7 +342,7 @@ function disegnaLista() {
     if (statoDi(n.nome) === 'a-posto') info0.push(el('span', 'badge integrata', '✓ tutto a posto'));
     if (chiede) info0.push(el('span', 'badge domande' + (chiede === 'drammaturgo' ? ' dramm' : ''), chiede === 'drammaturgo' ? '❓ il drammaturgo chiede' : '❓ lo spettatore chiede'));
     const info = el('div', 'info');
-    info.append(el('div', 'titolo', n.corpo || '(vuota)'));
+    info.append(el('div', 'titolo', testoDi(n) || '(vuota)'));
     info.append(el('div', 'meta', dataBreve(n.data)));
     if (n.cartella === 'coda') info.append(el('span', 'badge attesa', 'in attesa di rete'));
     else if (n.cartella === 'archivio') info.append(el('span', 'badge integrata', 'integrata nella wiki'));
@@ -369,8 +376,9 @@ function disegnaOpere() {
   }
 }
 
-let ideaAperta = null;
+let ideaAperta = null, inModifica = false;
 function apriDettaglio(nome) {
+  inModifica = false;
   ideaAperta = nome; vista('dettaglio'); disegnaDettaglio();
 }
 function disegnaDettaglio() {
@@ -380,7 +388,10 @@ function disegnaDettaglio() {
   // In testata solo la data (e il nome dell'opera, se è stata scelta): niente riquadro colorato.
   $('dett-titolo').textContent = (n.opera ? nomeOpera(n.opera) + ' · ' : '') + dataBreve(n.data);
   $('dett-nota').textContent = n.cartella === 'archivio' ? 'integrata nella wiki' : n.cartella === 'coda' ? 'in attesa di rete' : '';
-  $('dett-testo').textContent = n.corpo;
+  const ultima = versioniDi(n.nome).pop();
+  $('dett-testo').textContent = testoDi(n);
+  if (ultima) $('dett-nota').textContent = `✏️ modificata il ${dataBreve(ultima.data)}${ultima.cartella === 'coda' ? ' · in attesa di rete' : ''}`;
+  if (!inModifica) { $('dett-testo').hidden = false; $('dett-modifica-box').hidden = true; }
   const st = statoDi(n.nome);
   document.querySelectorAll('#dett-stato button').forEach((b) => b.classList.toggle('scelta', b.dataset.s === st));
   const dialogo = dialogoDi(n.nome);
@@ -446,6 +457,34 @@ $('sin-chiedi').addEventListener('click', async () => {
     scrivi('richieste', { ...leggi('richieste', {}), [idea.nome]: `${t.giorno} ${t.ora}` });
   } catch { mostra('sin-esito', 'Non sono riuscito a inviare la richiesta: controlla la rete e riprova.', 'errore'); $('sin-chiedi').disabled = false; return; }
   disegnaSinossi();
+});
+
+// ---------- Modifica a mano del testo dell'idea ----------
+// Non tocca il file originale: salva una versione nuova (inbox/…-ver-….md con tipo: versione).
+function chiudiModifica() { inModifica = false; $('dett-modifica-box').hidden = true; $('dett-testo').hidden = false; }
+$('dett-modifica-apri').addEventListener('click', () => {
+  const n = idee().find((x) => x.nome === ideaAperta);
+  if (!n) return;
+  if (inModifica) { chiudiModifica(); return; }
+  inModifica = true;
+  $('dett-modifica').value = leggi('bozza-ver-' + n.nome, '') || testoDi(n);
+  $('dett-testo').hidden = true; $('dett-modifica-box').hidden = false; mostra('oss-esito', '');
+  setTimeout(() => $('dett-modifica').focus(), 50);
+});
+$('dett-modifica').addEventListener('input', () => scrivi('bozza-ver-' + ideaAperta, $('dett-modifica').value));
+$('dett-annulla').addEventListener('click', () => { scrivi('bozza-ver-' + ideaAperta, ''); chiudiModifica(); });
+$('dett-salva').addEventListener('click', () => {
+  const n = idee().find((x) => x.nome === ideaAperta);
+  const testo = $('dett-modifica').value;
+  if (!n) return;
+  if (!testo.trim()) { mostra('oss-esito', "Il testo non può restare vuoto.", 'tenue'); return; }
+  if (testo.trim() === testoDi(n).trim()) { scrivi('bozza-ver-' + n.nome, ''); chiudiModifica(); return; }
+  if (!memoria.chiave) { mostra('oss-esito', "Prima collega l'archivio con la chiave.", 'errore'); return; }
+  memoria.coda = [...memoria.coda, preparaNota(testo, { riferita_a: n.nome, tipo: 'versione', opera: n.opera }, 'ver-')];
+  scrivi('bozza-ver-' + n.nome, '');
+  chiudiModifica(); mostra('oss-esito', 'Invio…', 'tenue');
+  disegnaTutto();
+  svuotaCoda('oss-esito');
 });
 
 // Il dialogo si apre sull'ultimo intervento, il più recente.
