@@ -207,3 +207,14 @@ main.dett .osservazioni { flex: 1; min-height: 0; overflow-y: auto; overscroll-b
 #vista-lista .info { overflow: hidden; }
 #vista-lista .info > * { flex-shrink: 0; }
 @media (max-height: 720px) { #vista-lista .info .titolo { line-height: 1.25; } }
+
+/* ---- v14: qualche pixel in più per le schede della prima pagina ---- */
+#vista-lista .barra-cerca { padding-top: 8px; padding-bottom: 2px; }
+#stato-lista { height: 14px; margin: 1px 0 !important; font-size: 12px; line-height: 14px; }
+#vista-lista .lista { gap: 6px; padding-bottom: 6px; }
+#vista-lista .scheda { padding: 6px; }
+#vista-lista .info .meta { margin-top: 3px; }
+#vista-lista .badge { margin-top: 3px; }
+#vista-lista .badge.nuova { margin-bottom: 3px; }
+#vista-lista .pagine button { padding: 8px 16px; }
+#vista-lista .pagine { padding-bottom: calc(env(safe-area-inset-bottom) + 6px); }

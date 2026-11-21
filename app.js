@@ -273,7 +273,19 @@ function disegnaLista() {
     li.addEventListener('keydown', (e) => { if (e.key === 'Enter') apriDettaglio(n.nome); });
     return li;
   }));
+  requestAnimationFrame(adattaSchede);
 }
+
+// Se in una scheda il testo non ci sta, il titolo perde una riga alla volta (almeno una resta).
+function adattaSchede() {
+  document.querySelectorAll('#vista-lista .scheda .info').forEach((info) => {
+    const t = info.querySelector('.titolo'); if (!t) return;
+    t.style.webkitLineClamp = '';
+    let righe = parseInt(getComputedStyle(t).webkitLineClamp, 10) || 3;
+    while (righe > 1 && info.scrollHeight > info.clientHeight + 1) t.style.webkitLineClamp = String(--righe);
+  });
+}
+window.addEventListener('resize', () => requestAnimationFrame(adattaSchede));
 
 function disegnaOpere() {
   const opere = leggi('opere', []);
