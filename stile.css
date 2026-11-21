@@ -181,3 +181,29 @@ main.dett .dett-testo { flex: none; max-height: 28vh; overflow-y: auto; }
 main.dett h2 { flex: none; }
 main.dett .osservazioni { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-bottom: 6px; }
 .compositore { position: static; flex: none; }
+
+/* ---- v13: la prima pagina non scorre mai; le 4 schede si dividono lo spazio ---- */
+#vista-lista { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
+#vista-lista header { position: static; flex: none; }
+#vista-lista .barra-cerca { flex: none; width: 100%; }
+#stato-lista { flex: none; height: 18px; margin: 2px 0 !important; overflow: hidden; }
+#vista-lista .lista {
+  flex: 1; min-height: 0; width: 100%; display: grid; grid-template-rows: repeat(4, minmax(0, 1fr)); gap: 8px;
+  padding: 0 12px 8px; margin: 0 auto;
+}
+#vista-lista .scheda { min-height: 0; margin: 0; overflow: hidden; }
+#vista-lista .copertina { max-height: 100%; }
+#vista-lista .pagine { flex: none; width: 100%; padding-top: 0; padding-bottom: calc(env(safe-area-inset-bottom) + 10px); }
+/* telefoni bassi: copertina e testo più compatti, così le 4 schede ci stanno sempre */
+@media (max-height: 720px) {
+  #vista-lista .copertina { padding: 4px; gap: 2px; }
+  #vista-lista .copertina .maschera { display: none; }
+  #vista-lista .copertina .locandina { font-size: 13px; -webkit-line-clamp: 2; }
+  #vista-lista .info .titolo { font-size: 15.5px; -webkit-line-clamp: 2; }
+  #vista-lista .info .meta { margin-top: 2px; font-size: 12.5px; }
+  #vista-lista .badge { margin-top: 3px; }
+  #vista-lista .badge.nuova { margin-bottom: 3px; }
+}
+#vista-lista .info { overflow: hidden; }
+#vista-lista .info > * { flex-shrink: 0; }
+@media (max-height: 720px) { #vista-lista .info .titolo { line-height: 1.25; } }

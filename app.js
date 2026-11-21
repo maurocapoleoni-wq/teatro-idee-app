@@ -234,10 +234,6 @@ function disegnaLista() {
     && (!q || n.corpo.toLowerCase().includes(q) || osservazioniDi(n.nome).some((o) => o.corpo.toLowerCase().includes(q))));
   const ul = $('lista');
   $('pagine').hidden = true;
-  const daIntegrare = elenco.filter((n) => n.cartella !== 'archivio').length;
-  $('riepilogo').textContent = elenco.length
-    ? `${elenco.length === 1 ? '1 idea' : elenco.length + ' idee'}${q || f !== '*' ? ' trovate' : ''}, di cui ${daIntegrare} da integrare`
-    : '';
   if (!collegata() && !tutte.length) { ul.replaceChildren(el('li', 'tenue centro', 'Collega l\'archivio dalle impostazioni ⚙︎')); return; }
   if (!elenco.length) { ul.replaceChildren(el('li', 'tenue centro', q || f !== '*' ? 'Nessuna idea trovata.' : 'Ancora nessuna idea. Tocca «＋ Idea» per scriverne una.')); return; }
   // Pagine da 4 idee, come nell'esempio scelto dall'autore.
