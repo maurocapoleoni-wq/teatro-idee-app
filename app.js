@@ -251,9 +251,14 @@ function mostra(id, testo, classe = '') { const el = $(id); if (el) { el.textCon
 function el(tag, classe, testo) { const e = document.createElement(tag); if (classe) e.className = classe; if (testo !== undefined) e.textContent = testo; return e; }
 
 const TINTE = ['#5b1a24', '#2e4a62', '#4a5d23', '#6b3f69', '#7a4b1e', '#1f5c57', '#7d2e2e', '#3d3a6b'];
+// Nei temi chiari le copertine usano colori pastello (stesso ordine: ogni opera tiene il suo colore).
+const TINTE_CHIARE = { pastello: ['#f6c9d0', '#c9dcf6', '#d4ecc4', '#e3cff0', '#f8dcbc', '#c4ebe5', '#f4c7bd', '#d3d0f2'],
+  carta: ['#e2c2a8', '#c5d0d8', '#cfd6b4', '#d8c5d6', '#e6cfa6', '#bfd6cf', '#e0b9ac', '#cbc6dc'] };
 function tinta(opera) {
-  if (!opera) return 'linear-gradient(135deg,#4b3f39,#7a6a60)';
+  const chiare = TINTE_CHIARE[document.documentElement.dataset.tema];
+  if (!opera) return chiare ? (document.documentElement.dataset.tema === 'carta' ? 'linear-gradient(135deg,#e8d9bb,#d8c49c)' : 'linear-gradient(135deg,#efe4f2,#e2d4ea)') : 'linear-gradient(135deg,#4b3f39,#7a6a60)';
   let h = 0; for (const c of opera) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  if (chiare) { const p = chiare[h % chiare.length]; return `linear-gradient(135deg, ${p}, ${p}cc)`; }
   const t = TINTE[h % TINTE.length];
   return `linear-gradient(135deg, ${t}, ${t}cc)`;
 }
@@ -634,6 +639,19 @@ function disegnaCancellate() {
     return li;
   }));
 }
+
+// ---------- Aspetto: tema dei colori (resta solo su questo telefono) ----------
+const TEMI = { scuro: '#0f0f0f', pastello: '#f3e8f1', carta: '#e8dcc0', notte: '#0f1724' };
+function applicaTema(t) {
+  if (!TEMI[t]) t = 'scuro';
+  document.documentElement.dataset.tema = t;
+  const m = document.querySelector('meta[name="theme-color"]'); if (m) m.content = TEMI[t];
+  document.querySelectorAll('#tema button').forEach((b) => b.classList.toggle('scelta', b.dataset.t === t));
+}
+document.querySelectorAll('#tema button').forEach((b) => b.addEventListener('click', () => {
+  scrivi('tema', b.dataset.t); applicaTema(b.dataset.t); disegnaTutto();
+}));
+applicaTema(leggi('tema', 'scuro'));
 
 // ---------- Ogni quanto passa lo spettatore ----------
 // La scelta si scrive nell'archivio come file nuovo in spettatore/frequenza/: la routine legge il più recente.

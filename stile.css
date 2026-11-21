@@ -288,3 +288,59 @@ main.sinossi { flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 1
   display: block; width: auto; margin: 18px 0 0 auto; padding: 6px 12px; font-size: 13.5px;
   background: transparent; border: 1px solid #6b2a2a; color: #e07070; border-radius: 16px;
 }
+
+/* ---- v29: temi (Impostazioni → Aspetto). «scuro» è quello di sempre. ---- */
+:root { --testo-testata: #fff; --spett-fondo: #1d1a2e; --dramm-fondo: #15272a; --verde-pag: #39ff14; --blu-pag: #1fd1ff; --sinossi-fondo: #2a2216; }
+header, .icona, .modifica-testata { color: var(--testo-testata); }
+.osservazioni li.spett { background: var(--spett-fondo); }
+.osservazioni li.spett.dramm { background: var(--dramm-fondo); }
+#pag-prima { color: var(--verde-pag); border-color: var(--verde-pag); }
+#pag-dopo { color: var(--blu-pag); border-color: var(--blu-pag); }
+.sinossi-testata { background: var(--sinossi-fondo); }
+.microfono .m-mic { background: var(--fondo); }
+
+/* Pastello: chiaro, fondo crema, schede e copertine color confetto */
+:root[data-tema="pastello"] {
+  color-scheme: light;
+  --fondo: #fbf7f2; --testata: #f3e8f1; --carta: #ffffff; --testo: #3b3340; --tenue: #7d7285;
+  --sipario: #c96b85; --oro: #a77b2c; --bordo: #e6dbe4; --ok: #3f8f55; --errore: #c0473a;
+  --ombra: 0 1px 4px rgba(90,60,90,.10);
+  --testo-testata: #3b3340; --spett-fondo: #f0edff; --dramm-fondo: #e6f6f3;
+  --verde-pag: #2e9d4f; --blu-pag: #2f7fc1; --sinossi-fondo: #fff4dc;
+}
+/* Carta: color seppia, come un copione vecchio */
+:root[data-tema="carta"] {
+  color-scheme: light;
+  --fondo: #f4ecd8; --testata: #e8dcc0; --carta: #fbf5e6; --testo: #3a2e22; --tenue: #7a6a55;
+  --sipario: #8e2433; --oro: #8a6420; --bordo: #d9caa8; --ok: #4d7a3a; --errore: #a8382c;
+  --ombra: 0 1px 3px rgba(80,60,30,.12);
+  --testo-testata: #3a2e22; --spett-fondo: #ece4f2; --dramm-fondo: #e2efe9;
+  --verde-pag: #3d7d2a; --blu-pag: #2c5f8f; --sinossi-fondo: #f6e7c4;
+}
+/* Notte blu: scuro ma morbido, blu inchiostro */
+:root[data-tema="notte"] {
+  color-scheme: dark;
+  --fondo: #0f1724; --testata: #0f1724; --carta: #1a2537; --testo: #e6ecf5; --tenue: #94a3b8;
+  --sipario: #7b5cc4; --oro: #e5c07b; --bordo: #2a3a52; --ok: #7fd1a0; --errore: #f39c8f;
+  --testo-testata: #fff; --spett-fondo: #1f2147; --dramm-fondo: #12303a;
+  --verde-pag: #5dff8f; --blu-pag: #6fd0ff; --sinossi-fondo: #2a2a3a;
+}
+/* Nei temi chiari le copertine pastello hanno il testo scuro */
+:root[data-tema="pastello"] .copertina, :root[data-tema="carta"] .copertina { color: #3b3340; }
+:root[data-tema="pastello"] .copertina .locandina, :root[data-tema="carta"] .copertina .locandina { text-shadow: none; border-color: rgba(59,51,64,.35); }
+:root[data-tema="pastello"] .copertina .contatore, :root[data-tema="carta"] .copertina .contatore { background: rgba(255,255,255,.75); color: #3b3340; }
+:root[data-tema="pastello"] .copertina .contatore.nuove, :root[data-tema="carta"] .copertina .contatore.nuove { background: #e0142b; color: #fff; }
+:root[data-tema="pastello"] .copertina .fase, :root[data-tema="carta"] .copertina .fase { color: #fff; }
+:root[data-tema="pastello"] .cestino-basso, :root[data-tema="carta"] .cestino-basso { color: #b03a3a; border-color: #e3b3b3; }
+/* campioni dei temi nelle impostazioni */
+.temi button { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.campione { width: 18px; height: 18px; border-radius: 50%; border: 1px solid rgba(128,128,128,.6); flex: none; }
+.c-scuro { background: linear-gradient(135deg,#0f0f0f 50%,#8e2433 50%); }
+.c-pastello { background: linear-gradient(135deg,#fbf7f2 50%,#f6c9d0 50%); }
+.c-carta { background: linear-gradient(135deg,#f4ecd8 50%,#e2c2a8 50%); }
+.c-notte { background: linear-gradient(135deg,#0f1724 50%,#7b5cc4 50%); }
+/* testata dell'idea: la data su una riga sola, la nota si accorcia se non c'è posto */
+#dett-titolo { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; font-size: 16px; }
+#vista-dettaglio .nota-testata { flex: 0 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; }
+#dett-titolo { flex: 0 0 auto; }
+#vista-dettaglio .nota-testata { flex: 1 1 0; }
