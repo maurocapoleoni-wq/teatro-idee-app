@@ -345,7 +345,7 @@ header, .icona, .modifica-testata { color: var(--testo-testata); }
 #vista-dettaglio .nota-testata { flex: 0 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; }
 #dett-titolo { flex: 0 0 auto; }
 #vista-dettaglio .nota-testata { flex: 1 1 0; }
-:root[data-tema="fluo"] .nuova-testata { background: #ff2bd6; color: #fff; box-shadow: 0 0 10px rgba(255,43,214,.6); }
+:root[data-tema="fluo"] .nuova-testata { background: #3dff7f; color: #04140a; box-shadow: 0 0 12px rgba(61,255,127,.75); }
 /* v30: la testata dell'idea non esce mai dallo schermo: se serve, la data si accorcia con i puntini */
 #dett-titolo { flex: 0 1 auto; }
 #vista-dettaglio header > button { flex: none; }
