@@ -13,50 +13,73 @@
   <link rel="stylesheet" href="stile.css">
 </head>
 <body>
-  <header>
-    <h1>Idee</h1>
-    <button id="apri-impostazioni" class="icona" aria-label="Impostazioni">⚙︎</button>
-  </header>
+  <!-- ============ LISTA ============ -->
+  <section id="vista-lista" class="vista">
+    <header>
+      <h1>Idee</h1>
+      <button id="aggiorna" class="icona" aria-label="Aggiorna">↻</button>
+      <button id="apri-impostazioni" class="icona" aria-label="Impostazioni">⚙︎</button>
+    </header>
+    <div class="barra-cerca">
+      <input id="cerca" type="search" placeholder="Cerca tra le idee…" autocomplete="off">
+      <select id="filtro-opera" aria-label="Filtra per opera"><option value="*">Tutte</option></select>
+    </div>
+    <p id="stato-lista" class="tenue centro"></p>
+    <ul id="lista" class="lista"></ul>
+    <button id="nuova" class="fab" aria-label="Nuova idea">＋</button>
+  </section>
 
-  <main id="vista-idea">
-    <label for="opera">Opera</label>
-    <select id="opera">
-      <option value="">Opera attiva</option>
-    </select>
+  <!-- ============ NUOVA IDEA ============ -->
+  <section id="vista-nuova" class="vista" hidden>
+    <header>
+      <button class="icona indietro" aria-label="Indietro">‹</button>
+      <h1>Nuova idea</h1>
+    </header>
+    <main>
+      <label for="opera">Opera</label>
+      <select id="opera"><option value="">Opera attiva</option></select>
+      <label for="testo">L'idea</label>
+      <textarea id="testo" rows="10" placeholder="Scrivi o detta l'idea…"></textarea>
+      <button id="invia" class="principale">Invia</button>
+      <p id="esito" class="esito" role="status" aria-live="polite"></p>
+    </main>
+  </section>
 
-    <label for="testo">L'idea</label>
-    <textarea id="testo" rows="9" placeholder="Scrivi o detta l'idea…" autofocus></textarea>
+  <!-- ============ DETTAGLIO ============ -->
+  <section id="vista-dettaglio" class="vista" hidden>
+    <header>
+      <button class="icona indietro" aria-label="Indietro">‹</button>
+      <h1>Idea</h1>
+    </header>
+    <main>
+      <div id="dett-testata" class="dett-testata"></div>
+      <article id="dett-testo" class="dett-testo"></article>
+      <h2 id="dett-titolo-oss">Osservazioni</h2>
+      <ul id="dett-osservazioni" class="osservazioni"></ul>
+      <label for="oss-testo">Aggiungi un'osservazione</label>
+      <textarea id="oss-testo" rows="4" placeholder="Un dettaglio, un dubbio, uno sviluppo…"></textarea>
+      <button id="oss-invia" class="principale">Aggiungi</button>
+      <p id="oss-esito" class="esito" role="status" aria-live="polite"></p>
+    </main>
+  </section>
 
-    <button id="invia" class="principale">Invia</button>
-    <p id="esito" role="status" aria-live="polite"></p>
-
-    <section id="sezione-attesa" hidden>
-      <h2>In attesa di rete</h2>
-      <ul id="lista-attesa"></ul>
-    </section>
-
-    <section>
-      <h2>Arrivate, da integrare</h2>
-      <ul id="lista-recenti"><li class="tenue">—</li></ul>
-    </section>
-  </main>
-
-  <main id="vista-impostazioni" hidden>
-    <h2>Impostazioni</h2>
-    <p class="tenue">Servono una volta sola. Restano salvate solo su questo telefono.</p>
-
-    <label for="chiave">Chiave GitHub</label>
-    <input id="chiave" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…">
-
-    <label for="archivio">Nome dell'archivio</label>
-    <input id="archivio" type="text" autocomplete="off" spellcheck="false" value="teatro-wiki">
-
-    <button id="salva" class="principale">Salva e prova</button>
-    <button id="chiudi-impostazioni">Indietro</button>
-    <p id="esito-impostazioni" role="status" aria-live="polite"></p>
-
-    <button id="dimentica" class="pericolo">Togli la chiave da questo telefono</button>
-  </main>
+  <!-- ============ IMPOSTAZIONI ============ -->
+  <section id="vista-impostazioni" class="vista" hidden>
+    <header>
+      <button class="icona indietro" aria-label="Indietro">‹</button>
+      <h1>Impostazioni</h1>
+    </header>
+    <main>
+      <p class="tenue">Servono una volta sola. Restano salvate solo su questo telefono.</p>
+      <label for="chiave">Chiave GitHub</label>
+      <input id="chiave" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…">
+      <label for="archivio">Nome dell'archivio</label>
+      <input id="archivio" type="text" autocomplete="off" spellcheck="false" value="teatro-wiki">
+      <button id="salva" class="principale">Salva e prova</button>
+      <p id="esito-impostazioni" class="esito" role="status" aria-live="polite"></p>
+      <button id="dimentica" class="pericolo">Togli la chiave da questo telefono</button>
+    </main>
+  </section>
 
   <script src="app.js"></script>
 </body>

@@ -1,5 +1,5 @@
 // Tiene in memoria l'app per aprirla anche senza rete. Le chiamate a GitHub non passano di qui.
-const VERSIONE = 'idee-v1';
+const VERSIONE = 'idee-v2';
 const FILE = ['./', 'index.html', 'stile.css', 'app.js', 'manifest.webmanifest', 'icona-192.png', 'icona-512.png'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(VERSIONE).then((c) => c.addAll(FILE))); self.skipWaiting(); });
 self.addEventListener('activate', (e) => {
