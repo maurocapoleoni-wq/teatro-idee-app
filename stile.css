@@ -392,3 +392,12 @@ header, .icona, .modifica-testata { color: var(--testo-testata); }
   font-size: 3.1em; line-height: .85; padding: 4px 6px 0 0;
 }
 .c-pergamena { background: linear-gradient(135deg,#ecd9ad 50%,#9e2a1e 50%); border-color: #a8771f; }
+/* ---- v33: Pergamena, prima pagina con un dettaglio del «Giardino delle delizie» di Bosch, velato
+   da uno strato color pergamena perché le schede restino leggibili ---- */
+:root[data-tema="pergamena"] #vista-lista {
+  background:
+    linear-gradient(rgba(236,217,173,.45), rgba(236,217,173,.6)),
+    url("sfondo-bosch.webp") center / cover no-repeat;
+}
+:root[data-tema="pergamena"] #vista-lista header { background: linear-gradient(rgba(226,200,145,.88), rgba(213,182,121,.88)); }
+:root[data-tema="pergamena"] #vista-lista .scheda { background: rgba(246,233,200,.9); }
