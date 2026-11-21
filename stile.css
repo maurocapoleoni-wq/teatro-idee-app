@@ -1,0 +1,47 @@
+:root {
+  --fondo: #faf6f0;
+  --testo: #2a1f1a;
+  --tenue: #7a6a60;
+  --sipario: #5b1a24;
+  --oro: #c9a24a;
+  --bordo: #d9cfc4;
+  --ok: #2f6b3a;
+  --errore: #a3261b;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --fondo: #1c1614; --testo: #f1e9e0; --tenue: #a8988c; --bordo: #43372f; --ok: #7cc58a; --errore: #f08a7e; }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--fondo); color: var(--testo);
+  font: 18px/1.45 Georgia, "Times New Roman", serif;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--sipario); color: #fff;
+  padding: calc(env(safe-area-inset-top) + 10px) 16px 10px;
+}
+h1 { margin: 0; font-size: 22px; letter-spacing: .04em; }
+h2 { font-size: 16px; color: var(--tenue); margin: 26px 0 6px; font-weight: normal; text-transform: uppercase; letter-spacing: .06em; }
+main { padding: 12px 16px 40px; max-width: 640px; margin: 0 auto; }
+label { display: block; margin: 14px 0 4px; color: var(--tenue); font-size: 15px; }
+textarea, input, select {
+  width: 100%; font: inherit; color: inherit; background: transparent;
+  border: 1px solid var(--bordo); border-radius: 10px; padding: 10px 12px;
+}
+textarea { resize: vertical; min-height: 180px; }
+button {
+  font: inherit; border-radius: 10px; padding: 12px 16px; margin-top: 12px;
+  border: 1px solid var(--bordo); background: transparent; color: inherit; width: 100%;
+}
+button.principale { background: var(--sipario); color: #fff; border-color: var(--sipario); font-size: 20px; }
+button.principale:disabled { opacity: .5; }
+button.pericolo { color: var(--errore); margin-top: 40px; }
+button.icona { width: auto; margin: 0; padding: 4px 10px; color: #fff; border: none; font-size: 24px; }
+ul { list-style: none; padding: 0; margin: 0; }
+li { border-bottom: 1px solid var(--bordo); padding: 8px 0; font-size: 15px; }
+.tenue { color: var(--tenue); }
+.ok { color: var(--ok); }
+.errore { color: var(--errore); }
+#esito, #esito-impostazioni { min-height: 1.4em; margin: 10px 0 0; }

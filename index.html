@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#5b1a24">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Idee">
+  <title>Idee</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icona-192.png">
+  <link rel="apple-touch-icon" href="icona-192.png">
+  <link rel="stylesheet" href="stile.css">
+</head>
+<body>
+  <header>
+    <h1>Idee</h1>
+    <button id="apri-impostazioni" class="icona" aria-label="Impostazioni">⚙︎</button>
+  </header>
+
+  <main id="vista-idea">
+    <label for="opera">Opera</label>
+    <select id="opera">
+      <option value="">Opera attiva</option>
+    </select>
+
+    <label for="testo">L'idea</label>
+    <textarea id="testo" rows="9" placeholder="Scrivi o detta l'idea…" autofocus></textarea>
+
+    <button id="invia" class="principale">Invia</button>
+    <p id="esito" role="status" aria-live="polite"></p>
+
+    <section id="sezione-attesa" hidden>
+      <h2>In attesa di rete</h2>
+      <ul id="lista-attesa"></ul>
+    </section>
+
+    <section>
+      <h2>Arrivate, da integrare</h2>
+      <ul id="lista-recenti"><li class="tenue">—</li></ul>
+    </section>
+  </main>
+
+  <main id="vista-impostazioni" hidden>
+    <h2>Impostazioni</h2>
+    <p class="tenue">Servono una volta sola. Restano salvate solo su questo telefono.</p>
+
+    <label for="chiave">Chiave GitHub</label>
+    <input id="chiave" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…">
+
+    <label for="archivio">Nome dell'archivio</label>
+    <input id="archivio" type="text" autocomplete="off" spellcheck="false" value="teatro-wiki">
+
+    <button id="salva" class="principale">Salva e prova</button>
+    <button id="chiudi-impostazioni">Indietro</button>
+    <p id="esito-impostazioni" role="status" aria-live="polite"></p>
+
+    <button id="dimentica" class="pericolo">Togli la chiave da questo telefono</button>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
