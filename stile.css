@@ -227,5 +227,5 @@ main.dett .osservazioni { flex: 1; min-height: 0; overflow-y: auto; overscroll-b
 #vista-lista .pagine { margin-top: 0; }
 html:has(#vista-lista:not([hidden])), body:has(#vista-lista:not([hidden])) { overflow: hidden; height: 100%; }
 
-/* ---- v17: circa 1 mm in più tra un'idea e l'altra ---- */
-#vista-lista .lista { gap: 10px; }
+/* ---- v17-18: circa 2 mm in più tra un'idea e l'altra ---- */
+#vista-lista .lista { gap: 14px; }
