@@ -222,3 +222,7 @@ main.dett .osservazioni { flex: 1; min-height: 0; overflow-y: auto; overscroll-b
 /* ---- v15: niente targhetta NUOVA; le schede usano l'85% dello spazio, i pulsanti restano in fondo ---- */
 #vista-lista .lista { flex: .85 1 0; }
 #vista-lista .pagine { margin-top: auto; }
+
+/* ---- v16: i pulsanti subito sotto l'ultima idea; la prima pagina non scorre mai ---- */
+#vista-lista .pagine { margin-top: 0; }
+html:has(#vista-lista:not([hidden])), body:has(#vista-lista:not([hidden])) { overflow: hidden; height: 100%; }
