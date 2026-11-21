@@ -107,3 +107,5 @@ h2 { font-size: 14px; color: var(--tenue); margin: 28px 0 8px; font-weight: norm
 .osservazioni { list-style: none; padding: 0; margin: 0; }
 .osservazioni li { background: var(--carta); border: 1px solid var(--bordo); border-left: 4px solid var(--oro); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; white-space: pre-wrap; }
 .osservazioni .meta { display: block; color: var(--tenue); font-size: 13px; margin-bottom: 2px; white-space: normal; }
+.osservazioni li.spett { border-left-color: #8f7ff0; background: #1d1a2e; }
+.badge.domande { color: #b9aefc; border-color: #8f7ff0; }

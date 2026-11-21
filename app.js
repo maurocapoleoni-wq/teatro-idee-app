@@ -74,7 +74,7 @@ function analizza(nome, testo, cartella) {
   const corpo = righe.slice(i).join('\n').trim();
   const m = nome.match(/^(\d{4})-(\d{2})-(\d{2})-(\d{2})(\d{2})/);
   const data = testa.data || (m ? `${m[1]}-${m[2]}-${m[3]} ${m[4]}:${m[5]}` : nome.slice(0, 10));
-  return { nome, cartella, opera: testa.opera || '', riferita: testa.riferita_a || '', data, corpo };
+  return { nome, cartella, opera: testa.opera || '', riferita: testa.riferita_a || '', giro: testa.giro || '', data, corpo };
 }
 
 // Crea il file senza mai sovrascrivere: se il nome esiste già, aggiunge -2, -3…
@@ -127,7 +127,7 @@ async function caricaNote() {
   try {
     const r = await api(`${repo()}/git/trees/HEAD?recursive=1`);
     if (!r.ok) throw new Error('http ' + r.status);
-    const albero = (await r.json()).tree.filter((f) => f.type === 'blob' && /^inbox\/(archivio\/)?[^/]+\.md$/.test(f.path) && !f.path.endsWith('LEGGIMI.md'));
+    const albero = (await r.json()).tree.filter((f) => f.type === 'blob' && (/^inbox\/(archivio\/)?[^/]+\.md$/.test(f.path) || /^spettatore\/[^/]+--giro-\d+\.md$/.test(f.path)) && !f.path.endsWith('LEGGIMI.md'));
     const cache = leggi('cache', {});
     const daScaricare = albero.filter((f) => !cache[f.sha]);
     for (let i = 0; i < daScaricare.length; i += 6) {
@@ -140,7 +140,7 @@ async function caricaNote() {
     note = albero.filter((f) => cache[f.sha] !== undefined).map((f) => {
       vivi[f.sha] = cache[f.sha];
       const nome = f.path.split('/').pop();
-      return analizza(nome, cache[f.sha], f.path.includes('/archivio/') ? 'archivio' : 'inbox');
+      return analizza(nome, cache[f.sha], f.path.startsWith('spettatore/') ? 'spettatore' : f.path.includes('/archivio/') ? 'archivio' : 'inbox');
     });
     scrivi('cache', vivi); scrivi('note', note);
     mostra('stato-lista', '', '');
@@ -184,8 +184,15 @@ function idee() {
 }
 function osservazioniDi(nome) {
   const inCoda = memoria.coda.map((n) => analizza(n.nome, n.contenuto, 'coda')).filter((n) => n.riferita === nome);
-  return [...note.filter((n) => n.riferita === nome), ...inCoda].sort((a, b) => a.nome.localeCompare(b.nome));
+  return [...note.filter((n) => n.riferita === nome && n.cartella !== 'spettatore'), ...inCoda].sort((a, b) => a.nome.localeCompare(b.nome));
 }
+function domandeDi(nome) { return note.filter((n) => n.riferita === nome && n.cartella === 'spettatore'); }
+// Dialogo: osservazioni dell'autore e domande dello spettatore, in ordine di tempo.
+function dialogoDi(nome) {
+  return [...osservazioniDi(nome), ...domandeDi(nome)].sort((a, b) => a.data.localeCompare(b.data) || a.nome.localeCompare(b.nome));
+}
+// Lo spettatore aspetta una risposta se l'ultimo intervento del dialogo è suo.
+function attendeRisposta(nome) { const d = dialogoDi(nome); return d.length > 0 && d[d.length - 1].cartella === 'spettatore'; }
 
 const PER_PAGINA = 4;
 let pagina = 0;
@@ -221,13 +228,16 @@ function disegnaLista() {
     const cop = el('div', 'copertina'); cop.style.background = tinta(n.opera);
     cop.append(el('span', 'maschera', '🎭'), el('span', 'locandina', n.opera ? nomeOpera(n.opera) : 'Opera attiva'));
     const no = osservazioniDi(n.nome).length;
+    const info0 = [];
     if (no) cop.append(el('span', 'contatore', `💬 ${no}`));
+    if (attendeRisposta(n.nome)) info0.push(el('span', 'badge domande', '❓ lo spettatore chiede'));
     const info = el('div', 'info');
     if (n.cartella === 'inbox') info.append(el('span', 'badge nuova', 'NUOVA'));
     info.append(el('div', 'titolo', n.corpo || '(vuota)'));
     info.append(el('div', 'meta', dataBreve(n.data)));
     if (n.cartella === 'coda') info.append(el('span', 'badge attesa', 'in attesa di rete'));
     else if (n.cartella === 'archivio') info.append(el('span', 'badge integrata', 'integrata nella wiki'));
+    info.append(...info0);
     li.append(cop, info);
     li.addEventListener('click', () => apriDettaglio(n.nome));
     li.addEventListener('keydown', (e) => { if (e.key === 'Enter') apriDettaglio(n.nome); });
@@ -256,11 +266,14 @@ function disegnaDettaglio() {
   t.replaceChildren(el('div', '', nomeOpera(n.opera)), el('div', 'meta', dataBreve(n.data)
     + (n.cartella === 'archivio' ? ' · integrata nella wiki' : n.cartella === 'coda' ? ' · in attesa di rete' : ''))) ;
   $('dett-testo').textContent = n.corpo;
-  const oss = osservazioniDi(n.nome);
-  $('dett-titolo-oss').textContent = oss.length ? `Osservazioni (${oss.length})` : 'Osservazioni';
-  $('dett-osservazioni').replaceChildren(...(oss.length ? oss.map((o) => {
-    const li = el('li'); li.append(el('span', 'meta', dataBreve(o.data) + (o.cartella === 'coda' ? ' · in attesa di rete' : '')), document.createTextNode(o.corpo)); return li;
-  }) : [el('li', 'tenue', 'Nessuna osservazione per ora.')]));
+  const dialogo = dialogoDi(n.nome);
+  $('dett-titolo-oss').textContent = dialogo.length ? `Osservazioni e domande (${dialogo.length})` : 'Osservazioni e domande';
+  $('dett-osservazioni').replaceChildren(...(dialogo.length ? dialogo.map((o) => {
+    const spett = o.cartella === 'spettatore';
+    const li = el('li', spett ? 'spett' : '');
+    const chi = spett ? `🎟 Lo spettatore chiede${o.giro ? ' · giro ' + o.giro : ''}` : '✍ Tu';
+    li.append(el('span', 'meta', `${chi} · ${dataBreve(o.data)}${o.cartella === 'coda' ? ' · in attesa di rete' : ''}`), document.createTextNode(o.corpo)); return li;
+  }) : [el('li', 'tenue', 'Ancora niente. Lo spettatore passa ogni ora dalle 8 alle 23 e lascia qui le sue domande.')]));
 }
 
 function disegnaTutto() {
