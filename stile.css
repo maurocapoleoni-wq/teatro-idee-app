@@ -299,14 +299,14 @@ header, .icona, .modifica-testata { color: var(--testo-testata); }
 .sinossi-testata { background: var(--sinossi-fondo); }
 .microfono .m-mic { background: var(--fondo); }
 
-/* Pastello: chiaro, fondo crema, schede e copertine color confetto */
+/* Pastello (v30): chiaro e fresco, acqua e salvia, copertine menta, cielo, burro, lavanda, pesca */
 :root[data-tema="pastello"] {
   color-scheme: light;
-  --fondo: #fbf7f2; --testata: #f3e8f1; --carta: #ffffff; --testo: #3b3340; --tenue: #7d7285;
-  --sipario: #c96b85; --oro: #a77b2c; --bordo: #e6dbe4; --ok: #3f8f55; --errore: #c0473a;
-  --ombra: 0 1px 4px rgba(90,60,90,.10);
-  --testo-testata: #3b3340; --spett-fondo: #f0edff; --dramm-fondo: #e6f6f3;
-  --verde-pag: #2e9d4f; --blu-pag: #2f7fc1; --sinossi-fondo: #fff4dc;
+  --fondo: #eef4f3; --testata: #dcebe8; --carta: #ffffff; --testo: #2f3b3a; --tenue: #6b7d7b;
+  --sipario: #4f9384; --oro: #a8822f; --bordo: #cfe0dc; --ok: #3f8f55; --errore: #c0473a;
+  --ombra: 0 1px 4px rgba(40,80,75,.10);
+  --testo-testata: #2f3b3a; --spett-fondo: #eceafb; --dramm-fondo: #e2f3ee;
+  --verde-pag: #2e9d4f; --blu-pag: #2f7fc1; --sinossi-fondo: #fbf1d4;
 }
 /* Carta: color seppia, come un copione vecchio */
 :root[data-tema="carta"] {
@@ -317,14 +317,25 @@ header, .icona, .modifica-testata { color: var(--testo-testata); }
   --testo-testata: #3a2e22; --spett-fondo: #ece4f2; --dramm-fondo: #e2efe9;
   --verde-pag: #3d7d2a; --blu-pag: #2c5f8f; --sinossi-fondo: #f6e7c4;
 }
-/* Notte blu: scuro ma morbido, blu inchiostro */
-:root[data-tema="notte"] {
+/* Fluo (v30, al posto di Notte blu): fondo nero, colori saturi e fluorescenti */
+:root[data-tema="fluo"] {
   color-scheme: dark;
-  --fondo: #0f1724; --testata: #0f1724; --carta: #1a2537; --testo: #e6ecf5; --tenue: #94a3b8;
-  --sipario: #7b5cc4; --oro: #e5c07b; --bordo: #2a3a52; --ok: #7fd1a0; --errore: #f39c8f;
-  --testo-testata: #fff; --spett-fondo: #1f2147; --dramm-fondo: #12303a;
-  --verde-pag: #5dff8f; --blu-pag: #6fd0ff; --sinossi-fondo: #2a2a3a;
+  --fondo: #07060d; --testata: #07060d; --carta: #13111f; --testo: #f4f1ff; --tenue: #a49fc2;
+  --sipario: #ff2bd6; --oro: #ffe600; --bordo: #3b2a6e; --ok: #39ff14; --errore: #ff3864;
+  --ombra: 0 0 10px rgba(255,43,214,.25);
+  --testo-testata: #fff; --spett-fondo: #1d0f3a; --dramm-fondo: #062b2e;
+  --verde-pag: #39ff14; --blu-pag: #00e5ff; --sinossi-fondo: #2b2600;
 }
+:root[data-tema="fluo"] h1 { color: #ff2bd6; text-shadow: 0 0 8px rgba(255,43,214,.7); }
+:root[data-tema="fluo"] .scheda { border-color: #3b2a6e; box-shadow: 0 0 8px rgba(0,229,255,.18); }
+:root[data-tema="fluo"] .copertina { color: #0a0814; }
+:root[data-tema="fluo"] .copertina .locandina { text-shadow: none; border-color: rgba(10,8,20,.45); }
+:root[data-tema="fluo"] .copertina .contatore { background: rgba(10,8,20,.8); color: #fff; }
+:root[data-tema="fluo"] .copertina .contatore.nuove { background: #ff1744; color: #fff; box-shadow: 0 0 8px #ff1744; }
+:root[data-tema="fluo"] .copertina .fase { color: #fff; background: rgba(10,8,20,.75); }
+:root[data-tema="fluo"] .principale { box-shadow: 0 0 10px rgba(255,43,214,.55); }
+:root[data-tema="fluo"] #pag-prima { text-shadow: 0 0 6px rgba(57,255,20,.7); }
+:root[data-tema="fluo"] #pag-dopo { text-shadow: 0 0 6px rgba(0,229,255,.7); }
 /* Nei temi chiari le copertine pastello hanno il testo scuro */
 :root[data-tema="pastello"] .copertina, :root[data-tema="carta"] .copertina { color: #3b3340; }
 :root[data-tema="pastello"] .copertina .locandina, :root[data-tema="carta"] .copertina .locandina { text-shadow: none; border-color: rgba(59,51,64,.35); }
@@ -336,11 +347,17 @@ header, .icona, .modifica-testata { color: var(--testo-testata); }
 .temi button { display: flex; align-items: center; justify-content: center; gap: 8px; }
 .campione { width: 18px; height: 18px; border-radius: 50%; border: 1px solid rgba(128,128,128,.6); flex: none; }
 .c-scuro { background: linear-gradient(135deg,#0f0f0f 50%,#8e2433 50%); }
-.c-pastello { background: linear-gradient(135deg,#fbf7f2 50%,#f6c9d0 50%); }
+.c-pastello { background: linear-gradient(135deg,#eef4f3 50%,#b8e0d2 50%); }
 .c-carta { background: linear-gradient(135deg,#f4ecd8 50%,#e2c2a8 50%); }
-.c-notte { background: linear-gradient(135deg,#0f1724 50%,#7b5cc4 50%); }
+.c-fluo { background: conic-gradient(#ff2bd6 0 25%,#00e5ff 0 50%,#39ff14 0 75%,#ffe600 0); box-shadow: 0 0 6px #ff2bd6; }
 /* testata dell'idea: la data su una riga sola, la nota si accorcia se non c'è posto */
 #dett-titolo { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; font-size: 16px; }
 #vista-dettaglio .nota-testata { flex: 0 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; }
 #dett-titolo { flex: 0 0 auto; }
 #vista-dettaglio .nota-testata { flex: 1 1 0; }
+:root[data-tema="fluo"] .nuova-testata { background: #ff2bd6; color: #fff; box-shadow: 0 0 10px rgba(255,43,214,.6); }
+:root[data-tema="pastello"] .nuova-testata { background: #4f9384; color: #fff; }
+:root[data-tema="pastello"] .scheda.da-integrare { border-left-color: #e0957a; }
+/* v30: la testata dell'idea non esce mai dallo schermo: se serve, la data si accorcia con i puntini */
+#dett-titolo { flex: 0 1 auto; }
+#vista-dettaglio header > button { flex: none; }
