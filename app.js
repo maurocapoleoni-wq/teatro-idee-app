@@ -255,7 +255,11 @@ const TINTE = ['#5b1a24', '#2e4a62', '#4a5d23', '#6b3f69', '#7a4b1e', '#1f5c57',
 const TINTE_CHIARE = { pergamena: ['#9e2a1e', '#24407a', '#3f6b2a', '#a8771f', '#5e2d5e', '#6b4423', '#1f5c57', '#7a1f3d'],
   fluo: ['#ff2bd6', '#00e5ff', '#39ff14', '#ffe600', '#ff7a00', '#b026ff', '#ff3864', '#00ffa3'],
   carta: ['#e2c2a8', '#c5d0d8', '#cfd6b4', '#d8c5d6', '#e6cfa6', '#bfd6cf', '#e0b9ac', '#cbc6dc'] };
-function tinta(opera) {
+// Pergamena: le idee senza opera («opera attiva») si alternano verde e blu, come le miniature.
+const SENZA_OPERA = { pergamena: ['#3f6b2a', '#24407a'] };
+function tinta(opera, i = 0) {
+  const alterna = SENZA_OPERA[document.documentElement.dataset.tema];
+  if (!opera && alterna) { const p = alterna[i % alterna.length]; return `linear-gradient(135deg, ${p}, ${p}cc)`; }
   const chiare = TINTE_CHIARE[document.documentElement.dataset.tema];
   if (!opera) return chiare ? ({ carta: 'linear-gradient(135deg,#e8d9bb,#d8c49c)', fluo: 'linear-gradient(135deg,#ff2bd6,#00e5ff)' }[document.documentElement.dataset.tema] || 'linear-gradient(135deg,#7a5a36,#5a3d20)') : 'linear-gradient(135deg,#4b3f39,#7a6a60)';
   let h = 0; for (const c of opera) h = (h * 31 + c.charCodeAt(0)) >>> 0;
@@ -334,9 +338,9 @@ function disegnaLista() {
     $('pag-dopo').textContent = restanti ? `Altre ${restanti} ►` : 'Altre ►';
     $('pag-numero').textContent = `${pagina + 1} di ${totPagine}`;
   }
-  ul.replaceChildren(...visibili.map((n) => {
+  ul.replaceChildren(...visibili.map((n, i) => {
     const li = el('li', 'scheda' + (n.cartella === 'inbox' ? ' da-integrare' : '')); li.tabIndex = 0;
-    const cop = el('div', 'copertina'); cop.style.background = tinta(n.opera);
+    const cop = el('div', 'copertina'); cop.style.background = tinta(n.opera, inizio + i);
     const fase = FASI[statoDi(n.nome)] || FASI.spettatore;
     cop.append(el('span', 'maschera', fase.icona), el('span', 'locandina', n.opera ? nomeOpera(n.opera) : 'Opera attiva'),
       el('span', 'fase fase-' + statoDi(n.nome), fase.nome));
