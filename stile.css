@@ -1,17 +1,16 @@
 :root {
-  --fondo: #faf6f0;
-  --carta: #ffffff;
-  --testo: #2a1f1a;
-  --tenue: #7a6a60;
-  --sipario: #5b1a24;
-  --oro: #c9a24a;
-  --bordo: #e4dbd0;
-  --ok: #2f6b3a;
-  --errore: #a3261b;
-  --ombra: 0 1px 3px rgba(0,0,0,.08);
-}
-@media (prefers-color-scheme: dark) {
-  :root { --fondo: #141010; --carta: #221b19; --testo: #f1e9e0; --tenue: #a8988c; --bordo: #3a2f2a; --ok: #7cc58a; --errore: #f08a7e; --ombra: none; }
+  color-scheme: dark;
+  --fondo: #0f0f0f;
+  --testata: #0f0f0f;
+  --carta: #212121;
+  --testo: #f1f1f1;
+  --tenue: #aaaaaa;
+  --sipario: #8e2433;
+  --oro: #d9b25c;
+  --bordo: #303030;
+  --ok: #7cc58a;
+  --errore: #f08a7e;
+  --ombra: none;
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; background: var(--fondo); color: var(--testo); }
@@ -21,7 +20,7 @@ body { font: 17px/1.45 Georgia, "Times New Roman", serif; }
 header {
   position: sticky; top: 0; z-index: 5;
   display: flex; align-items: center; gap: 4px;
-  background: var(--sipario); color: #fff;
+  background: var(--testata); color: #fff; border-bottom: 1px solid var(--bordo);
   padding: calc(env(safe-area-inset-top) + 8px) 8px 8px 16px;
 }
 header h1 { margin: 0; font-size: 21px; letter-spacing: .03em; flex: 1; }
