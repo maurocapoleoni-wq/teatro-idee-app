@@ -74,7 +74,7 @@ function analizza(nome, testo, cartella) {
   const corpo = righe.slice(i).join('\n').trim();
   const m = nome.match(/^(\d{4})-(\d{2})-(\d{2})-(\d{2})(\d{2})/);
   const data = testa.data || (m ? `${m[1]}-${m[2]}-${m[3]} ${m[4]}:${m[5]}` : nome.slice(0, 10));
-  return { nome, cartella, opera: testa.opera || '', riferita: testa.riferita_a || '', giro: testa.giro || '', autore: testa.autore || '', data, corpo };
+  return { nome, cartella, opera: testa.opera || '', riferita: testa.riferita_a || '', giro: testa.giro || '', autore: testa.autore || '', bozza: testa.bozza || '', data, corpo };
 }
 
 // Crea il file senza mai sovrascrivere: se il nome esiste già, aggiunge -2, -3…
@@ -127,7 +127,7 @@ async function caricaNote() {
   try {
     const r = await api(`${repo()}/git/trees/HEAD?recursive=1`);
     if (!r.ok) throw new Error('http ' + r.status);
-    const albero = (await r.json()).tree.filter((f) => f.type === 'blob' && (/^inbox\/(archivio\/)?[^/]+\.md$/.test(f.path) || /^spettatore\/[^/]+--giro-\d+\.md$/.test(f.path) || /^spettatore\/(frequenza|stato)\/[^/]+\.md$/.test(f.path)) && !f.path.endsWith('LEGGIMI.md'));
+    const albero = (await r.json()).tree.filter((f) => f.type === 'blob' && (/^inbox\/(archivio\/)?[^/]+\.md$/.test(f.path) || /^spettatore\/[^/]+--(giro|bozza)-\d+\.md$/.test(f.path) || /^spettatore\/(frequenza|stato|richieste)\/[^/]+\.md$/.test(f.path)) && !f.path.endsWith('LEGGIMI.md'));
     const cache = leggi('cache', {});
     const daScaricare = albero.filter((f) => !cache[f.sha]);
     for (let i = 0; i < daScaricare.length; i += 6) {
@@ -154,7 +154,16 @@ async function caricaNote() {
         if (rif && st) stati[rif.trim()] = st;
       });
     scrivi('stati', stati);
-    note = albero.filter((f) => cache[f.sha] !== undefined && !/^spettatore\/(frequenza|stato)\//.test(f.path)).map((f) => {
+    // Le richieste di «sinossi fin qui»: per ogni idea conta la data della più recente.
+    const richieste = {};
+    albero.filter((f) => f.path.startsWith('spettatore/richieste/') && cache[f.sha] !== undefined)
+      .sort((a, b) => a.path.localeCompare(b.path)).forEach((f) => {
+        vivi[f.sha] = cache[f.sha];
+        const r = analizza(f.path.split('/').pop(), cache[f.sha], 'richieste');
+        if (r.riferita) richieste[r.riferita] = r.data;
+      });
+    scrivi('richieste', richieste);
+    note = albero.filter((f) => cache[f.sha] !== undefined && !/^spettatore\/(frequenza|stato|richieste)\//.test(f.path)).map((f) => {
       vivi[f.sha] = cache[f.sha];
       const nome = f.path.split('/').pop();
       return analizza(nome, cache[f.sha], f.path.startsWith('spettatore/') ? 'spettatore' : f.path.includes('/archivio/') ? 'archivio' : 'inbox');
@@ -232,7 +241,8 @@ function osservazioniDi(nome) {
   const inCoda = memoria.coda.map((n) => analizza(n.nome, n.contenuto, 'coda')).filter((n) => n.riferita === nome);
   return [...note.filter((n) => n.riferita === nome && n.cartella !== 'spettatore'), ...inCoda].sort((a, b) => a.nome.localeCompare(b.nome));
 }
-function domandeDi(nome) { return note.filter((n) => n.riferita === nome && n.cartella === 'spettatore'); }
+function domandeDi(nome) { return note.filter((n) => n.riferita === nome && n.cartella === 'spettatore' && !n.bozza); }
+function bozzeDi(nome) { return note.filter((n) => n.riferita === nome && n.bozza).sort((a, b) => (+a.bozza) - (+b.bozza)); }
 // Dialogo: osservazioni dell'autore e domande dello spettatore, in ordine di tempo.
 function dialogoDi(nome) {
   return [...osservazioniDi(nome), ...domandeDi(nome)].sort((a, b) => a.data.localeCompare(b.data) || a.nome.localeCompare(b.nome));
@@ -349,16 +359,71 @@ function disegnaDettaglio() {
   }) : [el('li', 'tenue', statoDi(n.nome) === 'a-posto' ? 'Nessuna domanda.' : 'Ancora niente. ' + testoFrequenza())]));
 }
 
+// ---------- Sinossi fin qui ----------
+// La bozza la scrive Claude al giro successivo dello spettatore, quando trova una richiesta.
+function prossimoGiro() {
+  const f = String(leggi('frequenza', '2'));
+  if (f === 'sospeso') return null;
+  const passo = +f || 2, ora = new Date().getHours();
+  for (let h = Math.max(ora + 1, 8); h <= 22; h++) if ((h - 8) % passo === 0) return `alle ${h}`;
+  return 'domattina alle 8';
+}
+function richiestaInAttesa(nome) {
+  const r = leggi('richieste', {})[nome]; if (!r) return false;
+  const b = bozzeDi(nome).pop();
+  return !b || r > b.data;
+}
+// Mostra il testo della bozza: titoli (#) in evidenza, il resto così com'è.
+function testoBozza(corpo) {
+  return corpo.split('\n').map((riga) => {
+    const m = riga.match(/^(#{1,3})\s+(.*)$/);
+    if (m) return el(m[1].length === 1 ? 'h3' : m[1].length === 2 ? 'h4' : 'h5', 'bozza-titolo', m[2].replace(/\*\*/g, ''));
+    return riga.trim() ? el('p', /\[(DA CHIARIRE|PROPOSTA)\]/.test(riga) ? 'bozza-riga segnata' : 'bozza-riga', riga.replace(/\*\*/g, '')) : null;
+  }).filter(Boolean);
+}
+function disegnaSinossi() {
+  const n = idee().find((x) => x.nome === ideaAperta);
+  if (!n) { vista('lista'); return; }
+  const b = bozzeDi(n.nome).pop();
+  $('sin-titolo').textContent = b ? `Sinossi fin qui · bozza ${b.bozza}` : 'Sinossi fin qui';
+  $('sin-testo').replaceChildren(...(b
+    ? [el('p', 'tenue', `Scritta il ${dataBreve(b.data)}, solo con le tue parole. [DA CHIARIRE] = ancora da decidere, [PROPOSTA] = aggiunto da Claude.`), ...testoBozza(b.corpo)]
+    : [el('p', 'tenue', 'Ancora nessuna bozza per questa idea. Tocca il pulsante qui sotto: Claude la scrive al prossimo giro dello spettatore.')]));
+  const aPosto = statoDi(n.nome) === 'a-posto', attesa = richiestaInAttesa(n.nome), giro = prossimoGiro();
+  $('sin-chiedi').disabled = aPosto || attesa || n.cartella === 'coda';
+  $('sin-chiedi').textContent = b ? '📜 Aggiorna la bozza' : '📜 Chiedi la bozza';
+  mostra('sin-esito', aPosto ? "L'idea è «tutto a posto»: la sinossi vera si fa sul PC."
+    : attesa ? (giro ? `Richiesta inviata ✓ La bozza arriva al prossimo giro, ${giro}.` : 'Richiesta inviata ✓ Lo spettatore è sospeso: riattivalo dalle impostazioni.')
+    : '', attesa ? 'ok' : 'tenue');
+}
+$('dett-sinossi').addEventListener('click', () => { vista('sinossi'); disegnaSinossi(); });
+$('sin-indietro').addEventListener('click', () => { vista('dettaglio'); disegnaDettaglio(); });
+$('sin-chiedi').addEventListener('click', async () => {
+  const idea = idee().find((x) => x.nome === ideaAperta);
+  if (!idea) return;
+  if (!collegata()) { mostra('sin-esito', "Prima collega l'archivio con la chiave.", 'errore'); return; }
+  const t = adesso();
+  $('sin-chiedi').disabled = true; mostra('sin-esito', 'Invio…', 'tenue');
+  try {
+    await creaFile({ nome: `${t.giorno}-${t.compatta}-sinossi.md`,
+      contenuto: ['riferita_a: ' + idea.nome, 'richiesta: sinossi', 'fonte: app', `data: ${t.giorno} ${t.ora}`, ''].join('\n') },
+    'spettatore/richieste', 'Sinossi fin qui, richiesta dal telefono');
+    scrivi('richieste', { ...leggi('richieste', {}), [idea.nome]: `${t.giorno} ${t.ora}` });
+  } catch { mostra('sin-esito', 'Non sono riuscito a inviare la richiesta: controlla la rete e riprova.', 'errore'); $('sin-chiedi').disabled = false; return; }
+  disegnaSinossi();
+});
+
 // Il dialogo si apre sull'ultimo intervento, il più recente.
 function scorriInFondo() { const ul = $('dett-osservazioni'); ul.scrollTop = ul.scrollHeight; }
 function disegnaTutto() {
   disegnaLista();
   if (!$('vista-dettaglio').hidden) disegnaDettaglio();
+  if (!$('vista-sinossi').hidden) disegnaSinossi();
 }
 
 function vista(nome) {
   fermaDettatura();
-  for (const v of ['lista', 'nuova', 'dettaglio', 'impostazioni']) $('vista-' + v).hidden = v !== nome;
+  for (const v of ['lista', 'nuova', 'dettaglio', 'sinossi', 'impostazioni']) $('vista-' + v).hidden = v !== nome;
   if (nome === 'impostazioni') { $('chiave').value = memoria.chiave; $('archivio').value = memoria.archivio; mostra('esito-frequenza', ''); disegnaFrequenza(); }
   if (nome === 'nuova') { mostra('esito', ''); setTimeout(() => $('testo').focus(), 50); }
   if (nome === 'dettaglio') { requestAnimationFrame(scorriInFondo); mostra('oss-esito', ''); $('oss-testo').value = leggi('bozza-oss-' + ideaAperta, ''); }
@@ -366,7 +431,7 @@ function vista(nome) {
 }
 
 // ---------- Azioni ----------
-document.querySelectorAll('.indietro').forEach((b) => b.addEventListener('click', () => vista('lista')));
+document.querySelectorAll('.indietro:not(#sin-indietro)').forEach((b) => b.addEventListener('click', () => vista('lista')));
 $('nuova').addEventListener('click', () => vista('nuova'));
 $('apri-impostazioni').addEventListener('click', () => vista('impostazioni'));
 $('aggiorna').addEventListener('click', async () => { await caricaNote(); caricaOpere(); disegnaTutto(); });

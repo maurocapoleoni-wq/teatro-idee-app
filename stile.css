@@ -244,3 +244,19 @@ html:has(#vista-lista:not([hidden])), body:has(#vista-lista:not([hidden])) { ove
   #vista-lista .copertina .maschera { display: none; }
   #vista-lista .copertina .locandina { font-size: 14px; -webkit-line-clamp: 2; }
 }
+
+/* ---- v24: sinossi fin qui ---- */
+.sinossi-testata {
+  width: auto; margin: 0 4px 0 6px; padding: 6px 12px; border-radius: 18px; white-space: nowrap;
+  background: #2a2216; border: 1px solid var(--oro); color: var(--oro); font-family: system-ui, sans-serif; font-size: 14px; font-weight: 700;
+}
+#vista-sinossi { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
+#vista-sinossi header { position: static; flex: none; }
+main.sinossi { flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 10px 16px 16px; }
+.sin-testo h3 { font-size: 20px; margin: 10px 0 6px; color: var(--oro); }
+.sin-testo h4 { font-size: 15px; margin: 16px 0 4px; color: var(--tenue); text-transform: uppercase; letter-spacing: .05em; font-weight: normal; }
+.sin-testo h5 { font-size: 16px; margin: 12px 0 2px; }
+.sin-testo p { margin: 4px 0; line-height: 1.45; }
+.sin-testo p.segnata { color: var(--oro); }
+#vista-sinossi .compositore { flex: none; }
+#vista-sinossi .compositore button { margin-top: 0; }
