@@ -350,4 +350,16 @@ $('testo').value = leggi('bozza', '');
 disegnaOpere(); disegnaTutto();
 if (!memoria.chiave) vista('impostazioni');
 else { caricaNote().then(disegnaTutto); caricaOpere(); svuotaCoda(); }
-if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js');
+// Aggiornamenti: a ogni apertura (e quando l'app torna in primo piano) controlla se c'è una
+// versione nuova; se c'è, la attiva e ricarica la pagina una volta sola.
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  const avevaControllo = !!navigator.serviceWorker.controller;
+  let ricaricata = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (avevaControllo && !ricaricata) { ricaricata = true; location.reload(); }
+  });
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then((reg) => {
+    reg.update();
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') reg.update(); });
+  });
+}
