@@ -296,16 +296,12 @@ function apriDettaglio(nome) {
 function disegnaDettaglio() {
   const n = idee().find((x) => x.nome === ideaAperta);
   if (!n) { vista('lista'); return; }
-  const t = $('dett-testata'); t.style.background = tinta(n.opera);
-  t.replaceChildren(el('div', '', nomeOpera(n.opera)), el('div', 'meta', dataBreve(n.data)
-    + (n.cartella === 'archivio' ? ' · integrata nella wiki' : n.cartella === 'coda' ? ' · in attesa di rete' : ''))) ;
+  // In testata solo la data (e il nome dell'opera, se è stata scelta): niente riquadro colorato.
+  $('dett-titolo').textContent = (n.opera ? nomeOpera(n.opera) + ' · ' : '') + dataBreve(n.data);
+  $('dett-nota').textContent = n.cartella === 'archivio' ? 'integrata nella wiki' : n.cartella === 'coda' ? 'in attesa di rete' : '';
   $('dett-testo').textContent = n.corpo;
   const st = statoDi(n.nome);
   document.querySelectorAll('#dett-stato button').forEach((b) => b.classList.toggle('scelta', b.dataset.s === st));
-  $('dett-stato-spiega').textContent = st === 'a-posto'
-    ? "Tutto a posto: niente più domande su questa idea. Sul PC si può integrare nella wiki. Puoi sempre riaprirla."
-    : st === 'drammaturgo' ? 'Ti fa le domande il drammaturgo: cerca cosa manca per la sinossi.'
-    : 'Ti fa le domande lo spettatore: reagisce come il pubblico in sala.';
   const dialogo = dialogoDi(n.nome);
   $('dett-titolo-oss').textContent = dialogo.length ? `Osservazioni e domande (${dialogo.length})` : 'Osservazioni e domande';
   $('dett-osservazioni').replaceChildren(...(dialogo.length ? dialogo.map((o) => {
@@ -327,7 +323,7 @@ function vista(nome) {
   for (const v of ['lista', 'nuova', 'dettaglio', 'impostazioni']) $('vista-' + v).hidden = v !== nome;
   if (nome === 'impostazioni') { $('chiave').value = memoria.chiave; $('archivio').value = memoria.archivio; mostra('esito-frequenza', ''); disegnaFrequenza(); }
   if (nome === 'nuova') { mostra('esito', ''); setTimeout(() => $('testo').focus(), 50); }
-  if (nome === 'dettaglio') { mostra('oss-esito', ''); mostra('esito-stato', ''); $('oss-testo').value = leggi('bozza-oss-' + ideaAperta, ''); }
+  if (nome === 'dettaglio') { mostra('oss-esito', ''); $('oss-testo').value = leggi('bozza-oss-' + ideaAperta, ''); }
   window.scrollTo(0, 0);
 }
 
@@ -406,19 +402,19 @@ document.querySelectorAll('#dett-stato button').forEach((b) => b.addEventListene
   const idea = idee().find((x) => x.nome === ideaAperta);
   const s = b.dataset.s;
   if (!idea || s === statoDi(idea.nome)) return;
-  if (!collegata()) { mostra('esito-stato', "Prima collega l'archivio con la chiave.", 'errore'); return; }
-  if (idea.cartella === 'coda') { mostra('esito-stato', "L'idea non è ancora arrivata nell'archivio: riprova quando torna la rete.", 'errore'); return; }
+  if (!collegata()) { mostra('oss-esito', "Prima collega l'archivio con la chiave.", 'errore'); return; }
+  if (idea.cartella === 'coda') { mostra('oss-esito', "L'idea non è ancora arrivata nell'archivio: riprova quando torna la rete.", 'errore'); return; }
   if (s === 'a-posto' && !confirm("Tutto a posto? Lo spettatore smette di fare domande e l'idea è pronta per il PC. Potrai sempre riaprirla.")) return;
   const t = adesso();
-  mostra('esito-stato', 'Salvo…', 'tenue');
+  mostra('oss-esito', 'Salvo…', 'tenue');
   try {
     const contenuto = ['riferita_a: ' + idea.nome, 'stato: ' + s, 'fonte: app', `data: ${t.giorno} ${t.ora}`, ''].join('\n');
     await creaFile({ nome: `${t.giorno}-${t.compatta}-stato.md`, contenuto }, 'spettatore/stato', "Stato dell'idea dal telefono");
     scrivi('stati', { ...leggi('stati', {}), [idea.nome]: s });
     disegnaTutto();
-    mostra('esito-stato', s === 'a-posto' ? 'Fatto ✓ Idea chiusa: è pronta per il PC.' : 'Fatto ✓ Vale dal prossimo passaggio.', 'ok');
+    mostra('oss-esito', s === 'a-posto' ? 'Fatto ✓ Idea chiusa: è pronta per il PC.' : 'Fatto ✓ Vale dal prossimo passaggio.', 'ok');
   } catch {
-    mostra('esito-stato', navigator.onLine ? 'Non sono riuscito a salvare: controlla la chiave.' : 'Serve la rete per cambiare lo stato.', 'errore');
+    mostra('oss-esito', navigator.onLine ? 'Non sono riuscito a salvare: controlla la chiave.' : 'Serve la rete per cambiare lo stato.', 'errore');
   }
 }));
 
@@ -450,11 +446,14 @@ let ascolto = null;
 function fermaDettatura() { if (ascolto) { try { ascolto.r.stop(); } catch { /* */ } } }
 function preparaMicrofoni() {
   document.querySelectorAll('[data-detta]').forEach((campo) => {
-    const box = el('div', 'campo-voce' + (campo.tagName === 'INPUT' ? ' riga' : ''));
-    campo.parentNode.insertBefore(box, campo); box.append(campo);
     const b = el('button', 'microfono'); b.type = 'button'; b.setAttribute('aria-label', 'Detta a voce');
     b.append(el('span', 'm-maschera', '🎭'), el('span', 'm-mic', '🎤'));
-    box.append(b);
+    // data-mic-in: il microfono va in un altro posto (per esempio accanto ai pulsanti di stato).
+    const posto = campo.dataset.micIn && $(campo.dataset.micIn);
+    if (posto) { b.classList.add('fuori'); posto.append(b); } else {
+      const box = el('div', 'campo-voce' + (campo.tagName === 'INPUT' ? ' riga' : ''));
+      campo.parentNode.insertBefore(box, campo); box.append(campo, b);
+    }
     b.addEventListener('click', () => detta(campo, b));
   });
 }

@@ -55,26 +55,30 @@
   <section id="vista-dettaglio" class="vista" hidden>
     <header>
       <button class="icona indietro" aria-label="Indietro">‹</button>
-      <h1>Idea</h1>
+      <h1 id="dett-titolo" class="titolo-piccolo">Idea</h1>
+      <span id="dett-nota" class="nota-testata"></span>
     </header>
-    <main>
-      <div id="dett-testata" class="dett-testata"></div>
+    <main class="dett">
       <article id="dett-testo" class="dett-testo"></article>
-      <h2>Chi ti fa le domande</h2>
-      <div id="dett-stato" class="scelte tre">
-        <button data-s="spettatore">🎟 Spettatore</button>
-        <button data-s="drammaturgo">🎭 Drammaturgo</button>
-        <button data-s="a-posto">✓ Tutto a posto</button>
-      </div>
-      <p id="dett-stato-spiega" class="tenue piccolo"></p>
-      <p id="esito-stato" class="esito" role="status" aria-live="polite"></p>
       <h2 id="dett-titolo-oss">Osservazioni</h2>
       <ul id="dett-osservazioni" class="osservazioni"></ul>
-      <label for="oss-testo">Rispondi o aggiungi un'osservazione</label>
-      <textarea id="oss-testo" data-detta rows="4" placeholder="Rispondi allo spettatore o aggiungi un dettaglio…"></textarea>
-      <button id="oss-invia" class="principale">Aggiungi</button>
-      <p id="oss-esito" class="esito" role="status" aria-live="polite"></p>
     </main>
+    <!-- In basso, sempre a portata: chi fa le domande, microfono, risposta. -->
+    <div class="compositore">
+      <div class="riga-stato">
+        <div id="dett-stato" class="scelte tre" role="group" aria-label="Chi ti fa le domande">
+          <button data-s="spettatore" title="Reagisce come il pubblico in sala">🎟 Spettatore</button>
+          <button data-s="drammaturgo" title="Cerca cosa manca per la sinossi">🎭 Drammaturgo</button>
+          <button data-s="a-posto" title="Niente più domande: l'idea passa al PC">✓ A posto</button>
+        </div>
+        <span id="posto-mic"></span>
+      </div>
+      <div class="riga-scrivi">
+        <textarea id="oss-testo" data-detta data-mic-in="posto-mic" rows="2" aria-label="Rispondi o aggiungi un'osservazione" placeholder="Rispondi o aggiungi un'osservazione…"></textarea>
+        <button id="oss-invia" class="principale invia-tondo" aria-label="Aggiungi">➤</button>
+      </div>
+      <p id="oss-esito" class="esito" role="status" aria-live="polite"></p>
+    </div>
   </section>
 
   <!-- ============ IMPOSTAZIONI ============ -->
@@ -101,7 +105,7 @@
       </div>
       <p id="esito-frequenza" class="esito" role="status" aria-live="polite"></p>
       <button id="dimentica" class="pericolo">Togli la chiave da questo telefono</button>
-      <p class="tenue centro">Versione dell'app: 10</p>
+      <p class="tenue centro">Versione dell'app: 11</p>
     </main>
   </section>
 

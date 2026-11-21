@@ -144,3 +144,31 @@ h2 { font-size: 14px; color: var(--tenue); margin: 28px 0 8px; font-weight: norm
 .copertina .fase { font-style: normal; font-family: system-ui, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: 1px 7px; border-radius: 9px; background: rgba(0,0,0,.45); }
 .copertina .fase-drammaturgo { background: #1f6f66; }
 .copertina .fase-a-posto { background: #2f6b3b; }
+
+/* ---- pagina dell'idea compatta (v11) ---- */
+.titolo-piccolo { font-size: 16px !important; font-family: system-ui, sans-serif; font-weight: 600; letter-spacing: 0 !important; color: var(--tenue); }
+.nota-testata { font-size: 12px; color: var(--ok); font-family: system-ui, sans-serif; padding-right: 8px; }
+main.dett { padding: 8px 12px 12px; }
+main.dett .dett-testo { font-size: 18px; line-height: 1.4; margin: 0; }
+main.dett h2 { margin: 14px 0 6px; }
+main.dett .osservazioni li { padding: 7px 10px; margin-bottom: 6px; font-size: 16px; line-height: 1.35; }
+main.dett .osservazioni .meta { font-size: 12px; }
+.compositore {
+  position: sticky; bottom: 0; z-index: 4; background: var(--fondo); border-top: 1px solid var(--bordo);
+  padding: 8px 10px calc(env(safe-area-inset-bottom) + 6px); max-width: 640px; margin: 0 auto;
+}
+.riga-stato { display: flex; gap: 8px; align-items: center; }
+.riga-stato .scelte { flex: 1; gap: 6px; }
+.riga-stato .scelte button { padding: 8px 2px; font-size: 13px; border-radius: 18px; }
+#posto-mic { flex: 0 0 auto; }
+.microfono.fuori { position: relative; right: auto; bottom: auto; width: 44px; height: 44px; font-size: 22px; }
+.riga-scrivi { display: flex; gap: 8px; align-items: flex-end; margin-top: 8px; }
+.riga-scrivi textarea { flex: 1; padding: 8px 12px; border-radius: 18px; min-height: 44px; max-height: 40vh; }
+.invia-tondo { width: 44px; height: 44px; margin: 0; padding: 0; border-radius: 50%; font-size: 18px; flex: 0 0 auto; }
+.compositore .esito { margin: 4px 0 0; min-height: 0; font-size: 13px; }
+.compositore .esito:empty { display: none; }
+#vista-dettaglio { display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; }
+main.dett { flex: 1; width: 100%; }
+.compositore { width: 100%; }
+.riga-stato .scelte { display: flex; }
+.riga-stato .scelte button { flex: 1 1 auto; white-space: nowrap; padding: 8px 6px; font-size: 12.5px; }
