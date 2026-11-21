@@ -127,7 +127,7 @@ async function caricaNote() {
   try {
     const r = await api(`${repo()}/git/trees/HEAD?recursive=1`);
     if (!r.ok) throw new Error('http ' + r.status);
-    const albero = (await r.json()).tree.filter((f) => f.type === 'blob' && (/^inbox\/(archivio\/)?[^/]+\.md$/.test(f.path) || /^spettatore\/[^/]+--giro-\d+\.md$/.test(f.path) || /^spettatore\/frequenza\/[^/]+\.md$/.test(f.path)) && !f.path.endsWith('LEGGIMI.md'));
+    const albero = (await r.json()).tree.filter((f) => f.type === 'blob' && (/^inbox\/(archivio\/)?[^/]+\.md$/.test(f.path) || /^spettatore\/[^/]+--giro-\d+\.md$/.test(f.path) || /^spettatore\/(frequenza|stato)\/[^/]+\.md$/.test(f.path)) && !f.path.endsWith('LEGGIMI.md'));
     const cache = leggi('cache', {});
     const daScaricare = albero.filter((f) => !cache[f.sha]);
     for (let i = 0; i < daScaricare.length; i += 6) {
@@ -144,7 +144,17 @@ async function caricaNote() {
       const m = cache[freq.sha].match(/^frequenza:\s*(\S+)/m);
       if (m) scrivi('frequenza', m[1]);
     }
-    note = albero.filter((f) => cache[f.sha] !== undefined && !f.path.startsWith('spettatore/frequenza/')).map((f) => {
+    // Lo stato di ogni idea (spettatore, drammaturgo, a-posto): vale il file più recente.
+    const stati = {};
+    albero.filter((f) => f.path.startsWith('spettatore/stato/') && cache[f.sha] !== undefined)
+      .sort((a, b) => a.path.localeCompare(b.path)).forEach((f) => {
+        vivi[f.sha] = cache[f.sha];
+        const testo = cache[f.sha];
+        const rif = (testo.match(/^riferita_a:\s*(.+)$/m) || [])[1], st = (testo.match(/^stato:\s*(\S+)/m) || [])[1];
+        if (rif && st) stati[rif.trim()] = st;
+      });
+    scrivi('stati', stati);
+    note = albero.filter((f) => cache[f.sha] !== undefined && !/^spettatore\/(frequenza|stato)\//.test(f.path)).map((f) => {
       vivi[f.sha] = cache[f.sha];
       const nome = f.path.split('/').pop();
       return analizza(nome, cache[f.sha], f.path.startsWith('spettatore/') ? 'spettatore' : f.path.includes('/archivio/') ? 'archivio' : 'inbox');
@@ -204,6 +214,9 @@ function attendeRisposta(nome) {
   const d = dialogoDi(nome); const u = d[d.length - 1];
   return u && u.cartella === 'spettatore' ? (eDrammaturgo(u) ? 'drammaturgo' : 'spettatore') : null;
 }
+// Come appare lo stato sulla copertina della scheda.
+const FASI = { spettatore: { icona: '🎟', nome: 'spettatore' }, drammaturgo: { icona: '🎭', nome: 'drammaturgo' }, 'a-posto': { icona: '✅', nome: 'tutto a posto' } };
+const statoDi = (nome) => leggi('stati', {})[nome] || 'spettatore';
 const eDrammaturgo = (o) => /drammaturgo/i.test(o.autore) || (!o.autore && +o.giro >= 4);
 function testoFrequenza() {
   const f = String(leggi('frequenza', '2'));
@@ -243,11 +256,14 @@ function disegnaLista() {
   ul.replaceChildren(...visibili.map((n) => {
     const li = el('li', 'scheda' + (n.cartella === 'inbox' ? ' da-integrare' : '')); li.tabIndex = 0;
     const cop = el('div', 'copertina'); cop.style.background = tinta(n.opera);
-    cop.append(el('span', 'maschera', '🎭'), el('span', 'locandina', n.opera ? nomeOpera(n.opera) : 'Opera attiva'));
+    const fase = FASI[statoDi(n.nome)] || FASI.spettatore;
+    cop.append(el('span', 'maschera', fase.icona), el('span', 'locandina', n.opera ? nomeOpera(n.opera) : 'Opera attiva'),
+      el('span', 'fase fase-' + statoDi(n.nome), fase.nome));
     const no = osservazioniDi(n.nome).length;
     const info0 = [];
     if (no) cop.append(el('span', 'contatore', `💬 ${no}`));
-    const chiede = attendeRisposta(n.nome);
+    const chiede = statoDi(n.nome) === 'a-posto' ? null : attendeRisposta(n.nome);
+    if (statoDi(n.nome) === 'a-posto') info0.push(el('span', 'badge integrata', '✓ tutto a posto'));
     if (chiede) info0.push(el('span', 'badge domande' + (chiede === 'drammaturgo' ? ' dramm' : ''), chiede === 'drammaturgo' ? '❓ il drammaturgo chiede' : '❓ lo spettatore chiede'));
     const info = el('div', 'info');
     if (n.cartella === 'inbox') info.append(el('span', 'badge nuova', 'NUOVA'));
@@ -284,6 +300,12 @@ function disegnaDettaglio() {
   t.replaceChildren(el('div', '', nomeOpera(n.opera)), el('div', 'meta', dataBreve(n.data)
     + (n.cartella === 'archivio' ? ' · integrata nella wiki' : n.cartella === 'coda' ? ' · in attesa di rete' : ''))) ;
   $('dett-testo').textContent = n.corpo;
+  const st = statoDi(n.nome);
+  document.querySelectorAll('#dett-stato button').forEach((b) => b.classList.toggle('scelta', b.dataset.s === st));
+  $('dett-stato-spiega').textContent = st === 'a-posto'
+    ? "Tutto a posto: niente più domande su questa idea. Sul PC si può integrare nella wiki. Puoi sempre riaprirla."
+    : st === 'drammaturgo' ? 'Ti fa le domande il drammaturgo: cerca cosa manca per la sinossi.'
+    : 'Ti fa le domande lo spettatore: reagisce come il pubblico in sala.';
   const dialogo = dialogoDi(n.nome);
   $('dett-titolo-oss').textContent = dialogo.length ? `Osservazioni e domande (${dialogo.length})` : 'Osservazioni e domande';
   $('dett-osservazioni').replaceChildren(...(dialogo.length ? dialogo.map((o) => {
@@ -292,7 +314,7 @@ function disegnaDettaglio() {
     const li = el('li', spett ? 'spett' + (dramm ? ' dramm' : '') : '');
     const chi = spett ? `${dramm ? '🎭 Il drammaturgo chiede' : '🎟 Lo spettatore chiede'}${o.giro ? ' · giro ' + o.giro : ''}` : '✍ Tu';
     li.append(el('span', 'meta', `${chi} · ${dataBreve(o.data)}${o.cartella === 'coda' ? ' · in attesa di rete' : ''}`), document.createTextNode(o.corpo)); return li;
-  }) : [el('li', 'tenue', 'Ancora niente. ' + testoFrequenza())]));
+  }) : [el('li', 'tenue', statoDi(n.nome) === 'a-posto' ? 'Nessuna domanda.' : 'Ancora niente. ' + testoFrequenza())]));
 }
 
 function disegnaTutto() {
@@ -305,7 +327,7 @@ function vista(nome) {
   for (const v of ['lista', 'nuova', 'dettaglio', 'impostazioni']) $('vista-' + v).hidden = v !== nome;
   if (nome === 'impostazioni') { $('chiave').value = memoria.chiave; $('archivio').value = memoria.archivio; mostra('esito-frequenza', ''); disegnaFrequenza(); }
   if (nome === 'nuova') { mostra('esito', ''); setTimeout(() => $('testo').focus(), 50); }
-  if (nome === 'dettaglio') { mostra('oss-esito', ''); $('oss-testo').value = leggi('bozza-oss-' + ideaAperta, ''); }
+  if (nome === 'dettaglio') { mostra('oss-esito', ''); mostra('esito-stato', ''); $('oss-testo').value = leggi('bozza-oss-' + ideaAperta, ''); }
   window.scrollTo(0, 0);
 }
 
@@ -377,6 +399,28 @@ $('dimentica').addEventListener('click', () => {
 });
 
 window.addEventListener('online', () => svuotaCoda());
+
+// ---------- Stato dell'idea: spettatore, drammaturgo o tutto a posto ----------
+// Ogni scelta è un file nuovo in spettatore/stato/: vale il più recente.
+document.querySelectorAll('#dett-stato button').forEach((b) => b.addEventListener('click', async () => {
+  const idea = idee().find((x) => x.nome === ideaAperta);
+  const s = b.dataset.s;
+  if (!idea || s === statoDi(idea.nome)) return;
+  if (!collegata()) { mostra('esito-stato', "Prima collega l'archivio con la chiave.", 'errore'); return; }
+  if (idea.cartella === 'coda') { mostra('esito-stato', "L'idea non è ancora arrivata nell'archivio: riprova quando torna la rete.", 'errore'); return; }
+  if (s === 'a-posto' && !confirm("Tutto a posto? Lo spettatore smette di fare domande e l'idea è pronta per il PC. Potrai sempre riaprirla.")) return;
+  const t = adesso();
+  mostra('esito-stato', 'Salvo…', 'tenue');
+  try {
+    const contenuto = ['riferita_a: ' + idea.nome, 'stato: ' + s, 'fonte: app', `data: ${t.giorno} ${t.ora}`, ''].join('\n');
+    await creaFile({ nome: `${t.giorno}-${t.compatta}-stato.md`, contenuto }, 'spettatore/stato', "Stato dell'idea dal telefono");
+    scrivi('stati', { ...leggi('stati', {}), [idea.nome]: s });
+    disegnaTutto();
+    mostra('esito-stato', s === 'a-posto' ? 'Fatto ✓ Idea chiusa: è pronta per il PC.' : 'Fatto ✓ Vale dal prossimo passaggio.', 'ok');
+  } catch {
+    mostra('esito-stato', navigator.onLine ? 'Non sono riuscito a salvare: controlla la chiave.' : 'Serve la rete per cambiare lo stato.', 'errore');
+  }
+}));
 
 // ---------- Ogni quanto passa lo spettatore ----------
 // La scelta si scrive nell'archivio come file nuovo in spettatore/frequenza/: la routine legge il più recente.

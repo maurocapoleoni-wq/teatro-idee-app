@@ -132,3 +132,15 @@ h2 { font-size: 14px; color: var(--tenue); margin: 28px 0 8px; font-weight: norm
 .scelte { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .scelte button { margin: 0; font-family: system-ui, sans-serif; font-size: 15px; background: var(--carta); }
 .scelte button.scelta { background: var(--sipario); border-color: var(--sipario); color: #fff; font-weight: 700; }
+
+/* ---- stato dell'idea ---- */
+.scelte.tre { grid-template-columns: 1fr 1fr 1fr; }
+.scelte.tre button { padding: 10px 4px; font-size: 14px; }
+#dett-stato button[data-s="drammaturgo"].scelta { background: #1f6f66; border-color: #3fb6a8; }
+#dett-stato button[data-s="a-posto"].scelta { background: #2f6b3b; border-color: var(--ok); }
+.piccolo { font-size: 14px; margin: 8px 0 0; }
+
+/* ---- stato sulla copertina ---- */
+.copertina .fase { font-style: normal; font-family: system-ui, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: 1px 7px; border-radius: 9px; background: rgba(0,0,0,.45); }
+.copertina .fase-drammaturgo { background: #1f6f66; }
+.copertina .fase-a-posto { background: #2f6b3b; }
