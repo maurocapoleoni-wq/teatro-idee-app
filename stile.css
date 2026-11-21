@@ -51,7 +51,7 @@ h2 { font-size: 14px; color: var(--tenue); margin: 28px 0 8px; font-weight: norm
 #stato-lista { font-size: 14px; margin: 6px 0; min-height: 1em; }
 
 /* ---- lista a schede (circa 4 per schermata) ---- */
-.lista { list-style: none; margin: 0 auto; padding: 4px 12px 110px; max-width: 640px; }
+.lista { list-style: none; margin: 0 auto; padding: 4px 12px 0; max-width: 640px; }
 .scheda {
   display: flex; gap: 12px; align-items: stretch;
   background: var(--carta); border-radius: 12px; box-shadow: var(--ombra);
@@ -82,12 +82,22 @@ h2 { font-size: 14px; color: var(--tenue); margin: 28px 0 8px; font-weight: norm
 .badge { display: inline-block; font-size: 12px; padding: 1px 7px; border-radius: 10px; margin-top: 6px; border: 1px solid var(--bordo); color: var(--tenue); width: fit-content; }
 .badge.attesa { color: var(--oro); border-color: var(--oro); }
 .badge.integrata { color: var(--ok); border-color: var(--ok); }
+.badge.nuova { background: #cc1f2f; border-color: #cc1f2f; color: #fff; font-family: system-ui, sans-serif; font-weight: 700; letter-spacing: .03em; border-radius: 4px; margin: 0 0 6px; }
+.scheda.da-integrare { border-left: 4px solid #cc1f2f; }
 
-.fab {
-  position: fixed; right: 18px; bottom: calc(env(safe-area-inset-bottom) + 18px);
-  width: 62px; height: 62px; border-radius: 50%; padding: 0; margin: 0;
-  background: var(--sipario); color: #fff; border: none; font-size: 32px; line-height: 1;
-  box-shadow: 0 4px 14px rgba(0,0,0,.3); z-index: 6;
+/* ---- riepilogo e pagine ---- */
+.riepilogo { max-width: 640px; margin: 4px auto 6px; padding: 0 16px; color: var(--testo); font-size: 16px; }
+.pagine {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  max-width: 640px; margin: 4px auto 0; padding: 4px 12px calc(env(safe-area-inset-bottom) + 24px);
+}
+.pagine button { width: auto; margin: 0; border-radius: 22px; padding: 10px 16px; background: var(--carta); border-color: var(--bordo); color: var(--testo); font-family: system-ui, sans-serif; font-size: 15px; }
+.pagine button:disabled { opacity: .35; }
+.pagine .numero { color: var(--tenue); font-family: system-ui, sans-serif; font-size: 14px; white-space: nowrap; }
+
+.nuova-testata {
+  width: auto; margin: 0 6px 0 0; padding: 7px 14px; border-radius: 20px; border: none;
+  background: #cc1f2f; color: #fff; font-family: system-ui, sans-serif; font-weight: 700; font-size: 15px;
 }
 
 /* ---- dettaglio ---- */

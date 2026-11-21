@@ -187,6 +187,8 @@ function osservazioniDi(nome) {
   return [...note.filter((n) => n.riferita === nome), ...inCoda].sort((a, b) => a.nome.localeCompare(b.nome));
 }
 
+const PER_PAGINA = 4;
+let pagina = 0;
 function disegnaLista() {
   const q = $('cerca').value.trim().toLowerCase();
   const f = $('filtro-opera').value;
@@ -194,15 +196,34 @@ function disegnaLista() {
   const elenco = tutte.filter((n) => (f === '*' || n.opera === f)
     && (!q || n.corpo.toLowerCase().includes(q) || osservazioniDi(n.nome).some((o) => o.corpo.toLowerCase().includes(q))));
   const ul = $('lista');
+  $('pagine').hidden = true;
+  const daIntegrare = elenco.filter((n) => n.cartella !== 'archivio').length;
+  $('riepilogo').textContent = elenco.length
+    ? `${elenco.length === 1 ? '1 idea' : elenco.length + ' idee'}${q || f !== '*' ? ' trovate' : ''}, di cui ${daIntegrare} da integrare`
+    : '';
   if (!collegata() && !tutte.length) { ul.replaceChildren(el('li', 'tenue centro', 'Collega l\'archivio dalle impostazioni ⚙︎')); return; }
-  if (!elenco.length) { ul.replaceChildren(el('li', 'tenue centro', q || f !== '*' ? 'Nessuna idea trovata.' : 'Ancora nessuna idea. Tocca ＋ per scriverne una.')); return; }
-  ul.replaceChildren(...elenco.map((n) => {
-    const li = el('li', 'scheda'); li.tabIndex = 0;
+  if (!elenco.length) { ul.replaceChildren(el('li', 'tenue centro', q || f !== '*' ? 'Nessuna idea trovata.' : 'Ancora nessuna idea. Tocca «＋ Idea» per scriverne una.')); return; }
+  // Pagine da 4 idee, come nell'esempio scelto dall'autore.
+  const totPagine = Math.ceil(elenco.length / PER_PAGINA);
+  pagina = Math.min(Math.max(pagina, 0), totPagine - 1);
+  const inizio = pagina * PER_PAGINA;
+  const visibili = elenco.slice(inizio, inizio + PER_PAGINA);
+  if (totPagine > 1) {
+    $('pagine').hidden = false;
+    $('pag-prima').disabled = pagina === 0;
+    const restanti = elenco.length - (inizio + visibili.length);
+    $('pag-dopo').disabled = restanti === 0;
+    $('pag-dopo').textContent = restanti ? `Altre ${restanti} ►` : 'Altre ►';
+    $('pag-numero').textContent = `${pagina + 1} di ${totPagine}`;
+  }
+  ul.replaceChildren(...visibili.map((n) => {
+    const li = el('li', 'scheda' + (n.cartella === 'inbox' ? ' da-integrare' : '')); li.tabIndex = 0;
     const cop = el('div', 'copertina'); cop.style.background = tinta(n.opera);
     cop.append(el('span', 'maschera', '🎭'), el('span', 'locandina', n.opera ? nomeOpera(n.opera) : 'Opera attiva'));
     const no = osservazioniDi(n.nome).length;
     if (no) cop.append(el('span', 'contatore', `💬 ${no}`));
     const info = el('div', 'info');
+    if (n.cartella === 'inbox') info.append(el('span', 'badge nuova', 'NUOVA'));
     info.append(el('div', 'titolo', n.corpo || '(vuota)'));
     info.append(el('div', 'meta', dataBreve(n.data)));
     if (n.cartella === 'coda') info.append(el('span', 'badge attesa', 'in attesa di rete'));
@@ -260,8 +281,10 @@ document.querySelectorAll('.indietro').forEach((b) => b.addEventListener('click'
 $('nuova').addEventListener('click', () => vista('nuova'));
 $('apri-impostazioni').addEventListener('click', () => vista('impostazioni'));
 $('aggiorna').addEventListener('click', async () => { await caricaNote(); caricaOpere(); disegnaTutto(); });
-$('cerca').addEventListener('input', disegnaLista);
-$('filtro-opera').addEventListener('change', disegnaLista);
+$('cerca').addEventListener('input', () => { pagina = 0; disegnaLista(); });
+$('filtro-opera').addEventListener('change', () => { pagina = 0; disegnaLista(); });
+$('pag-prima').addEventListener('click', () => { pagina--; disegnaLista(); window.scrollTo(0, 0); });
+$('pag-dopo').addEventListener('click', () => { pagina++; disegnaLista(); window.scrollTo(0, 0); });
 
 $('invia').addEventListener('click', () => {
   const testo = $('testo').value;
@@ -269,6 +292,7 @@ $('invia').addEventListener('click', () => {
   if (!memoria.chiave) { vista('impostazioni'); mostra('esito-impostazioni', 'Prima inserisci la chiave GitHub.', 'errore'); return; }
   memoria.coda = [...memoria.coda, preparaNota(testo, { opera: $('opera').value })];
   $('testo').value = ''; scrivi('bozza', '');
+  pagina = 0; // la nuova idea compare in cima alla prima pagina
   mostra('esito', 'Invio…', 'tenue');
   disegnaTutto();
   svuotaCoda('esito').then(() => { if (!memoria.coda.length) setTimeout(() => vista('lista'), 700); });

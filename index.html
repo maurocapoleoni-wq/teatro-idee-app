@@ -17,6 +17,7 @@
   <section id="vista-lista" class="vista">
     <header>
       <h1>Idee</h1>
+      <button id="nuova" class="nuova-testata" aria-label="Nuova idea">＋ Idea</button>
       <button id="aggiorna" class="icona" aria-label="Aggiorna">↻</button>
       <button id="apri-impostazioni" class="icona" aria-label="Impostazioni">⚙︎</button>
     </header>
@@ -25,8 +26,13 @@
       <select id="filtro-opera" aria-label="Filtra per opera"><option value="*">Tutte</option></select>
     </div>
     <p id="stato-lista" class="tenue centro"></p>
+    <p id="riepilogo" class="riepilogo"></p>
     <ul id="lista" class="lista"></ul>
-    <button id="nuova" class="fab" aria-label="Nuova idea">＋</button>
+    <nav id="pagine" class="pagine" hidden>
+      <button id="pag-prima">◄ Precedenti</button>
+      <span id="pag-numero" class="numero"></span>
+      <button id="pag-dopo">Altre ►</button>
+    </nav>
   </section>
 
   <!-- ============ NUOVA IDEA ============ -->
