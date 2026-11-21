@@ -172,3 +172,12 @@ main.dett { flex: 1; width: 100%; }
 .compositore { width: 100%; }
 .riga-stato .scelte { display: flex; }
 .riga-stato .scelte button { flex: 1 1 auto; white-space: nowrap; padding: 8px 6px; font-size: 12.5px; }
+
+/* ---- v12: nella pagina dell'idea scorre solo il dialogo; testata, idea e barra in basso restano ferme ---- */
+#vista-dettaglio { height: 100vh; height: 100dvh; min-height: 0; overflow: hidden; }
+#vista-dettaglio header { position: static; flex: none; }
+main.dett { flex: 1; min-height: 0; display: flex; flex-direction: column; padding-bottom: 0; }
+main.dett .dett-testo { flex: none; max-height: 28vh; overflow-y: auto; }
+main.dett h2 { flex: none; }
+main.dett .osservazioni { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-bottom: 6px; }
+.compositore { position: static; flex: none; }

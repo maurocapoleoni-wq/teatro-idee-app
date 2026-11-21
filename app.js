@@ -313,6 +313,8 @@ function disegnaDettaglio() {
   }) : [el('li', 'tenue', statoDi(n.nome) === 'a-posto' ? 'Nessuna domanda.' : 'Ancora niente. ' + testoFrequenza())]));
 }
 
+// Il dialogo si apre sull'ultimo intervento, il più recente.
+function scorriInFondo() { const ul = $('dett-osservazioni'); ul.scrollTop = ul.scrollHeight; }
 function disegnaTutto() {
   disegnaLista();
   if (!$('vista-dettaglio').hidden) disegnaDettaglio();
@@ -323,7 +325,7 @@ function vista(nome) {
   for (const v of ['lista', 'nuova', 'dettaglio', 'impostazioni']) $('vista-' + v).hidden = v !== nome;
   if (nome === 'impostazioni') { $('chiave').value = memoria.chiave; $('archivio').value = memoria.archivio; mostra('esito-frequenza', ''); disegnaFrequenza(); }
   if (nome === 'nuova') { mostra('esito', ''); setTimeout(() => $('testo').focus(), 50); }
-  if (nome === 'dettaglio') { mostra('oss-esito', ''); $('oss-testo').value = leggi('bozza-oss-' + ideaAperta, ''); }
+  if (nome === 'dettaglio') { requestAnimationFrame(scorriInFondo); mostra('oss-esito', ''); $('oss-testo').value = leggi('bozza-oss-' + ideaAperta, ''); }
   window.scrollTo(0, 0);
 }
 
@@ -356,7 +358,7 @@ $('oss-invia').addEventListener('click', () => {
   memoria.coda = [...memoria.coda, preparaNota(testo, { riferita_a: idea.nome, opera: idea.opera }, 'oss-')];
   $('oss-testo').value = ''; scrivi('bozza-oss-' + ideaAperta, '');
   mostra('oss-esito', 'Invio…', 'tenue');
-  disegnaTutto();
+  disegnaTutto(); scorriInFondo();
   svuotaCoda('oss-esito');
 });
 
