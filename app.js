@@ -262,7 +262,6 @@ function disegnaLista() {
     if (statoDi(n.nome) === 'a-posto') info0.push(el('span', 'badge integrata', '✓ tutto a posto'));
     if (chiede) info0.push(el('span', 'badge domande' + (chiede === 'drammaturgo' ? ' dramm' : ''), chiede === 'drammaturgo' ? '❓ il drammaturgo chiede' : '❓ lo spettatore chiede'));
     const info = el('div', 'info');
-    if (n.cartella === 'inbox') info.append(el('span', 'badge nuova', 'NUOVA'));
     info.append(el('div', 'titolo', n.corpo || '(vuota)'));
     info.append(el('div', 'meta', dataBreve(n.data)));
     if (n.cartella === 'coda') info.append(el('span', 'badge attesa', 'in attesa di rete'));
