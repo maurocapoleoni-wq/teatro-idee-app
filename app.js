@@ -282,6 +282,7 @@ function disegnaTutto() {
 }
 
 function vista(nome) {
+  fermaDettatura();
   for (const v of ['lista', 'nuova', 'dettaglio', 'impostazioni']) $('vista-' + v).hidden = v !== nome;
   if (nome === 'impostazioni') { $('chiave').value = memoria.chiave; $('archivio').value = memoria.archivio; }
   if (nome === 'nuova') { mostra('esito', ''); setTimeout(() => $('testo').focus(), 50); }
@@ -358,7 +359,54 @@ $('dimentica').addEventListener('click', () => {
 
 window.addEventListener('online', () => svuotaCoda());
 
+// ---------- Microfono con la maschera: dettatura in ogni casella di testo ----------
+// Usa il riconoscimento vocale del telefono (Chrome su Android, Safari su iPhone).
+const Riconoscimento = window.SpeechRecognition || window.webkitSpeechRecognition;
+let ascolto = null;
+function fermaDettatura() { if (ascolto) { try { ascolto.r.stop(); } catch { /* */ } } }
+function preparaMicrofoni() {
+  document.querySelectorAll('[data-detta]').forEach((campo) => {
+    const box = el('div', 'campo-voce' + (campo.tagName === 'INPUT' ? ' riga' : ''));
+    campo.parentNode.insertBefore(box, campo); box.append(campo);
+    const b = el('button', 'microfono'); b.type = 'button'; b.setAttribute('aria-label', 'Detta a voce');
+    b.append(el('span', 'm-maschera', '🎭'), el('span', 'm-mic', '🎤'));
+    box.append(b);
+    b.addEventListener('click', () => detta(campo, b));
+  });
+}
+function detta(campo, b) {
+  if (!Riconoscimento) { alert('Su questo telefono l\'app non può usare il microfono. Puoi dettare con il microfono della tastiera.'); return; }
+  if (ascolto) { const era = ascolto.campo; fermaDettatura(); if (era === campo) return; }
+  const r = new Riconoscimento();
+  r.lang = 'it-IT'; r.interimResults = true; r.continuous = true;
+  const base = campo.value ? campo.value.replace(/\s*$/, ' ') : '';
+  const segnaposto = campo.placeholder;
+  let definitivo = '';
+  r.onresult = (e) => {
+    let provvisorio = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) definitivo += t; else provvisorio += t;
+    }
+    campo.value = base + definitivo + provvisorio;
+    campo.dispatchEvent(new Event('input'));
+  };
+  r.onerror = (e) => {
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') alert('Per dettare, permetti all\'app di usare il microfono (te lo chiede il telefono).');
+  };
+  r.onend = () => {
+    b.classList.remove('attivo'); campo.placeholder = segnaposto;
+    campo.value = (base + definitivo).replace(/\s+$/, '');
+    campo.dispatchEvent(new Event('input'));
+    if (ascolto && ascolto.r === r) ascolto = null;
+  };
+  ascolto = { r, campo };
+  b.classList.add('attivo'); campo.placeholder = 'Ti ascolto… tocca di nuovo la maschera per finire';
+  try { r.start(); } catch { b.classList.remove('attivo'); ascolto = null; }
+}
+
 // ---------- Avvio ----------
+preparaMicrofoni();
 $('testo').value = leggi('bozza', '');
 disegnaOpere(); disegnaTutto();
 if (!memoria.chiave) vista('impostazioni');
