@@ -273,7 +273,7 @@ function disegnaDettaglio() {
     const li = el('li', spett ? 'spett' : '');
     const chi = spett ? `🎟 Lo spettatore chiede${o.giro ? ' · giro ' + o.giro : ''}` : '✍ Tu';
     li.append(el('span', 'meta', `${chi} · ${dataBreve(o.data)}${o.cartella === 'coda' ? ' · in attesa di rete' : ''}`), document.createTextNode(o.corpo)); return li;
-  }) : [el('li', 'tenue', 'Ancora niente. Lo spettatore passa ogni ora dalle 8 alle 23 e lascia qui le sue domande.')]));
+  }) : [el('li', 'tenue', 'Ancora niente. Lo spettatore passa ogni 2 ore, dalle 8 alle 22, e lascia qui le sue domande.')]));
 }
 
 function disegnaTutto() {
