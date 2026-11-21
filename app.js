@@ -160,11 +160,40 @@ async function caricaNote() {
       return analizza(nome, cache[f.sha], f.path.startsWith('spettatore/') ? 'spettatore' : f.path.includes('/archivio/') ? 'archivio' : 'inbox');
     });
     scrivi('cache', vivi); scrivi('note', note);
+    avvisaDomandeNuove();
     mostra('stato-lista', '', '');
   } catch {
     mostra('stato-lista', navigator.onLine ? 'Non riesco a leggere l\'archivio. Controlla la chiave.' : 'Senza rete: mostro l\'ultima copia.', 'tenue centro');
   }
 }
+// ---------- Suono quando arrivano domande nuove ----------
+// Si sente solo con l'app aperta: a ogni aggiornamento confronta i giri con quelli già visti.
+// Spettatore: due note che salgono. Drammaturgo: tre note più gravi.
+let audio = null;
+function sbloccaAudio() {
+  try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); if (audio.state === 'suspended') audio.resume(); } catch { /* niente audio */ }
+}
+document.addEventListener('pointerdown', sbloccaAudio, { passive: true });
+function suona(dramm) {
+  sbloccaAudio(); if (!audio) return;
+  const note = dramm ? [392, 523.25, 659.25] : [659.25, 987.77];
+  note.forEach((f, i) => {
+    const t = audio.currentTime + i * 0.18, o = audio.createOscillator(), g = audio.createGain();
+    o.type = 'sine'; o.frequency.value = f;
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.35, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.5);
+    o.connect(g).connect(audio.destination); o.start(t); o.stop(t + 0.55);
+  });
+  if (navigator.vibrate) navigator.vibrate(dramm ? [80, 60, 80, 60, 80] : [80, 60, 80]);
+}
+function avvisaDomandeNuove() {
+  const giri = note.filter((n) => n.cartella === 'spettatore');
+  const visti = leggi('giri-visti', null);
+  scrivi('giri-visti', giri.map((n) => n.nome));
+  if (visti === null) return; // prima volta su questo telefono: niente suono per i giri vecchi
+  const nuovi = giri.filter((n) => !visti.includes(n.nome));
+  if (nuovi.length) suona(nuovi.some(eDrammaturgo));
+}
+
 async function caricaOpere() {
   if (!collegata() || !navigator.onLine) return;
   try {
@@ -503,6 +532,14 @@ $('testo').value = leggi('bozza', '');
 disegnaOpere(); disegnaTutto();
 if (!memoria.chiave) vista('impostazioni');
 else { caricaNote().then(disegnaTutto); caricaOpere(); svuotaCoda(); }
+// Con l'app aperta controlla le domande nuove ogni 5 minuti e quando torna in primo piano.
+let ultimoControllo = Date.now();
+function controllaDomande() {
+  if (!memoria.chiave || document.visibilityState !== 'visible') return;
+  ultimoControllo = Date.now(); caricaNote().then(disegnaTutto);
+}
+setInterval(controllaDomande, 5 * 60 * 1000);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && Date.now() - ultimoControllo > 30000) controllaDomande(); });
 // Aggiornamenti: a ogni apertura (e quando l'app torna in primo piano) controlla se c'è una
 // versione nuova; se c'è, la attiva e ricarica la pagina una volta sola.
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
