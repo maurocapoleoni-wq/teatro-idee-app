@@ -74,16 +74,16 @@ function analizza(nome, testo, cartella) {
   const corpo = righe.slice(i).join('\n').trim();
   const m = nome.match(/^(\d{4})-(\d{2})-(\d{2})-(\d{2})(\d{2})/);
   const data = testa.data || (m ? `${m[1]}-${m[2]}-${m[3]} ${m[4]}:${m[5]}` : nome.slice(0, 10));
-  return { nome, cartella, opera: testa.opera || '', riferita: testa.riferita_a || '', giro: testa.giro || '', data, corpo };
+  return { nome, cartella, opera: testa.opera || '', riferita: testa.riferita_a || '', giro: testa.giro || '', autore: testa.autore || '', data, corpo };
 }
 
 // Crea il file senza mai sovrascrivere: se il nome esiste già, aggiunge -2, -3…
-async function creaFile(nota) {
+async function creaFile(nota, cartella = 'inbox', messaggio = 'Dal telefono') {
   for (let n = 1; n <= 9; n++) {
     const nome = n === 1 ? nota.nome : nota.nome.replace(/\.md$/, `-${n}.md`);
-    const r = await api(`${repo()}/contents/inbox/${encodeURIComponent(nome)}`, {
+    const r = await api(`${repo()}/contents/${cartella}/${encodeURIComponent(nome)}`, {
       method: 'PUT',
-      body: JSON.stringify({ message: `Dal telefono: ${nome}`, content: inBase64(nota.contenuto) }),
+      body: JSON.stringify({ message: `${messaggio}: ${nome}`, content: inBase64(nota.contenuto) }),
     });
     if (r.status === 201) return nome;
     if (r.status === 422) continue;
@@ -127,7 +127,7 @@ async function caricaNote() {
   try {
     const r = await api(`${repo()}/git/trees/HEAD?recursive=1`);
     if (!r.ok) throw new Error('http ' + r.status);
-    const albero = (await r.json()).tree.filter((f) => f.type === 'blob' && (/^inbox\/(archivio\/)?[^/]+\.md$/.test(f.path) || /^spettatore\/[^/]+--giro-\d+\.md$/.test(f.path)) && !f.path.endsWith('LEGGIMI.md'));
+    const albero = (await r.json()).tree.filter((f) => f.type === 'blob' && (/^inbox\/(archivio\/)?[^/]+\.md$/.test(f.path) || /^spettatore\/[^/]+--giro-\d+\.md$/.test(f.path) || /^spettatore\/frequenza\/[^/]+\.md$/.test(f.path)) && !f.path.endsWith('LEGGIMI.md'));
     const cache = leggi('cache', {});
     const daScaricare = albero.filter((f) => !cache[f.sha]);
     for (let i = 0; i < daScaricare.length; i += 6) {
@@ -137,7 +137,14 @@ async function caricaNote() {
       }));
     }
     const vivi = {};
-    note = albero.filter((f) => cache[f.sha] !== undefined).map((f) => {
+    // La frequenza dello spettatore: vale il file più recente di spettatore/frequenza/.
+    const freq = albero.filter((f) => f.path.startsWith('spettatore/frequenza/')).sort((a, b) => a.path.localeCompare(b.path)).pop();
+    if (freq && cache[freq.sha] !== undefined) {
+      vivi[freq.sha] = cache[freq.sha];
+      const m = cache[freq.sha].match(/^frequenza:\s*(\S+)/m);
+      if (m) scrivi('frequenza', m[1]);
+    }
+    note = albero.filter((f) => cache[f.sha] !== undefined && !f.path.startsWith('spettatore/frequenza/')).map((f) => {
       vivi[f.sha] = cache[f.sha];
       const nome = f.path.split('/').pop();
       return analizza(nome, cache[f.sha], f.path.startsWith('spettatore/') ? 'spettatore' : f.path.includes('/archivio/') ? 'archivio' : 'inbox');
@@ -192,7 +199,17 @@ function dialogoDi(nome) {
   return [...osservazioniDi(nome), ...domandeDi(nome)].sort((a, b) => a.data.localeCompare(b.data) || a.nome.localeCompare(b.nome));
 }
 // Lo spettatore aspetta una risposta se l'ultimo intervento del dialogo è suo.
-function attendeRisposta(nome) { const d = dialogoDi(nome); return d.length > 0 && d[d.length - 1].cartella === 'spettatore'; }
+// Restituisce chi aspetta: null, 'spettatore' o 'drammaturgo'.
+function attendeRisposta(nome) {
+  const d = dialogoDi(nome); const u = d[d.length - 1];
+  return u && u.cartella === 'spettatore' ? (eDrammaturgo(u) ? 'drammaturgo' : 'spettatore') : null;
+}
+const eDrammaturgo = (o) => /drammaturgo/i.test(o.autore) || (!o.autore && +o.giro >= 4);
+function testoFrequenza() {
+  const f = String(leggi('frequenza', '2'));
+  if (f === 'sospeso') return 'Lo spettatore è sospeso: lo riattivi dalle impostazioni ⚙︎.';
+  return `Lo spettatore passa ${f === '1' ? 'ogni ora' : 'ogni ' + f + ' ore'}, dalle 8 alle 22, e lascia qui le sue domande.`;
+}
 
 const PER_PAGINA = 4;
 let pagina = 0;
@@ -230,7 +247,8 @@ function disegnaLista() {
     const no = osservazioniDi(n.nome).length;
     const info0 = [];
     if (no) cop.append(el('span', 'contatore', `💬 ${no}`));
-    if (attendeRisposta(n.nome)) info0.push(el('span', 'badge domande', '❓ lo spettatore chiede'));
+    const chiede = attendeRisposta(n.nome);
+    if (chiede) info0.push(el('span', 'badge domande' + (chiede === 'drammaturgo' ? ' dramm' : ''), chiede === 'drammaturgo' ? '❓ il drammaturgo chiede' : '❓ lo spettatore chiede'));
     const info = el('div', 'info');
     if (n.cartella === 'inbox') info.append(el('span', 'badge nuova', 'NUOVA'));
     info.append(el('div', 'titolo', n.corpo || '(vuota)'));
@@ -270,10 +288,11 @@ function disegnaDettaglio() {
   $('dett-titolo-oss').textContent = dialogo.length ? `Osservazioni e domande (${dialogo.length})` : 'Osservazioni e domande';
   $('dett-osservazioni').replaceChildren(...(dialogo.length ? dialogo.map((o) => {
     const spett = o.cartella === 'spettatore';
-    const li = el('li', spett ? 'spett' : '');
-    const chi = spett ? `🎟 Lo spettatore chiede${o.giro ? ' · giro ' + o.giro : ''}` : '✍ Tu';
+    const dramm = spett && eDrammaturgo(o);
+    const li = el('li', spett ? 'spett' + (dramm ? ' dramm' : '') : '');
+    const chi = spett ? `${dramm ? '🎭 Il drammaturgo chiede' : '🎟 Lo spettatore chiede'}${o.giro ? ' · giro ' + o.giro : ''}` : '✍ Tu';
     li.append(el('span', 'meta', `${chi} · ${dataBreve(o.data)}${o.cartella === 'coda' ? ' · in attesa di rete' : ''}`), document.createTextNode(o.corpo)); return li;
-  }) : [el('li', 'tenue', 'Ancora niente. Lo spettatore passa ogni 2 ore, dalle 8 alle 22, e lascia qui le sue domande.')]));
+  }) : [el('li', 'tenue', 'Ancora niente. ' + testoFrequenza())]));
 }
 
 function disegnaTutto() {
@@ -284,7 +303,7 @@ function disegnaTutto() {
 function vista(nome) {
   fermaDettatura();
   for (const v of ['lista', 'nuova', 'dettaglio', 'impostazioni']) $('vista-' + v).hidden = v !== nome;
-  if (nome === 'impostazioni') { $('chiave').value = memoria.chiave; $('archivio').value = memoria.archivio; }
+  if (nome === 'impostazioni') { $('chiave').value = memoria.chiave; $('archivio').value = memoria.archivio; mostra('esito-frequenza', ''); disegnaFrequenza(); }
   if (nome === 'nuova') { mostra('esito', ''); setTimeout(() => $('testo').focus(), 50); }
   if (nome === 'dettaglio') { mostra('oss-esito', ''); $('oss-testo').value = leggi('bozza-oss-' + ideaAperta, ''); }
   window.scrollTo(0, 0);
@@ -358,6 +377,27 @@ $('dimentica').addEventListener('click', () => {
 });
 
 window.addEventListener('online', () => svuotaCoda());
+
+// ---------- Ogni quanto passa lo spettatore ----------
+// La scelta si scrive nell'archivio come file nuovo in spettatore/frequenza/: la routine legge il più recente.
+function disegnaFrequenza() {
+  const f = String(leggi('frequenza', '2'));
+  document.querySelectorAll('#frequenza button').forEach((b) => b.classList.toggle('scelta', b.dataset.f === f));
+  $('frequenza-attuale').textContent = testoFrequenza();
+}
+document.querySelectorAll('#frequenza button').forEach((b) => b.addEventListener('click', async () => {
+  if (!collegata()) { mostra('esito-frequenza', "Prima collega l'archivio con la chiave.", 'errore'); return; }
+  const f = b.dataset.f, t = adesso();
+  mostra('esito-frequenza', 'Salvo…', 'tenue');
+  try {
+    const contenuto = ['frequenza: ' + f, 'fonte: app', `data: ${t.giorno} ${t.ora}`, ''].join('\n');
+    await creaFile({ nome: `${t.giorno}-${t.compatta}-frequenza.md`, contenuto },'spettatore/frequenza', 'Spettatore, frequenza dal telefono');
+    scrivi('frequenza', f); disegnaFrequenza(); disegnaTutto();
+    mostra('esito-frequenza', 'Fatto ✓ Vale dal prossimo passaggio.', 'ok');
+  } catch {
+    mostra('esito-frequenza', navigator.onLine ? 'Non sono riuscito a salvare: controlla la chiave.' : 'Serve la rete per cambiare la frequenza.', 'errore');
+  }
+}));
 
 // ---------- Microfono con la maschera: dettatura in ogni casella di testo ----------
 // Usa il riconoscimento vocale del telefono (Chrome su Android, Safari su iPhone).
