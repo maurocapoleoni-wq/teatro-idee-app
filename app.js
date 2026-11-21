@@ -252,12 +252,12 @@ function el(tag, classe, testo) { const e = document.createElement(tag); if (cla
 
 const TINTE = ['#5b1a24', '#2e4a62', '#4a5d23', '#6b3f69', '#7a4b1e', '#1f5c57', '#7d2e2e', '#3d3a6b'];
 // Nei temi chiari le copertine usano colori pastello (stesso ordine: ogni opera tiene il suo colore).
-const TINTE_CHIARE = { pastello: ['#b8e0d2', '#c7d8f0', '#f7e3a8', '#d9c9ee', '#f8cba6', '#a8d8e8', '#e2ecb4', '#c9c3e6'],
+const TINTE_CHIARE = { pergamena: ['#9e2a1e', '#24407a', '#3f6b2a', '#a8771f', '#5e2d5e', '#6b4423', '#1f5c57', '#7a1f3d'],
   fluo: ['#ff2bd6', '#00e5ff', '#39ff14', '#ffe600', '#ff7a00', '#b026ff', '#ff3864', '#00ffa3'],
   carta: ['#e2c2a8', '#c5d0d8', '#cfd6b4', '#d8c5d6', '#e6cfa6', '#bfd6cf', '#e0b9ac', '#cbc6dc'] };
 function tinta(opera) {
   const chiare = TINTE_CHIARE[document.documentElement.dataset.tema];
-  if (!opera) return chiare ? ({ carta: 'linear-gradient(135deg,#e8d9bb,#d8c49c)', fluo: 'linear-gradient(135deg,#ff2bd6,#00e5ff)' }[document.documentElement.dataset.tema] || 'linear-gradient(135deg,#dcebe8,#c7d8f0)') : 'linear-gradient(135deg,#4b3f39,#7a6a60)';
+  if (!opera) return chiare ? ({ carta: 'linear-gradient(135deg,#e8d9bb,#d8c49c)', fluo: 'linear-gradient(135deg,#ff2bd6,#00e5ff)' }[document.documentElement.dataset.tema] || 'linear-gradient(135deg,#7a5a36,#5a3d20)') : 'linear-gradient(135deg,#4b3f39,#7a6a60)';
   let h = 0; for (const c of opera) h = (h * 31 + c.charCodeAt(0)) >>> 0;
   if (chiare) { const p = chiare[h % chiare.length]; return `linear-gradient(135deg, ${p}, ${p}cc)`; }
   const t = TINTE[h % TINTE.length];
@@ -642,8 +642,9 @@ function disegnaCancellate() {
 }
 
 // ---------- Aspetto: tema dei colori (resta solo su questo telefono) ----------
-const TEMI = { scuro: '#0f0f0f', pastello: '#dcebe8', carta: '#e8dcc0', fluo: '#07060d' };
+const TEMI = { scuro: '#0f0f0f', pergamena: '#dcc08a', carta: '#e8dcc0', fluo: '#07060d' };
 function applicaTema(t) {
+  t = { pastello: 'pergamena', notte: 'fluo' }[t] || t;
   if (!TEMI[t]) t = 'scuro';
   document.documentElement.dataset.tema = t;
   const m = document.querySelector('meta[name="theme-color"]'); if (m) m.content = TEMI[t];

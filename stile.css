@@ -299,15 +299,6 @@ header, .icona, .modifica-testata { color: var(--testo-testata); }
 .sinossi-testata { background: var(--sinossi-fondo); }
 .microfono .m-mic { background: var(--fondo); }
 
-/* Pastello (v30): chiaro e fresco, acqua e salvia, copertine menta, cielo, burro, lavanda, pesca */
-:root[data-tema="pastello"] {
-  color-scheme: light;
-  --fondo: #eef4f3; --testata: #dcebe8; --carta: #ffffff; --testo: #2f3b3a; --tenue: #6b7d7b;
-  --sipario: #4f9384; --oro: #a8822f; --bordo: #cfe0dc; --ok: #3f8f55; --errore: #c0473a;
-  --ombra: 0 1px 4px rgba(40,80,75,.10);
-  --testo-testata: #2f3b3a; --spett-fondo: #eceafb; --dramm-fondo: #e2f3ee;
-  --verde-pag: #2e9d4f; --blu-pag: #2f7fc1; --sinossi-fondo: #fbf1d4;
-}
 /* Carta: color seppia, come un copione vecchio */
 :root[data-tema="carta"] {
   color-scheme: light;
@@ -336,18 +327,17 @@ header, .icona, .modifica-testata { color: var(--testo-testata); }
 :root[data-tema="fluo"] .principale { box-shadow: 0 0 10px rgba(255,43,214,.55); }
 :root[data-tema="fluo"] #pag-prima { text-shadow: 0 0 6px rgba(57,255,20,.7); }
 :root[data-tema="fluo"] #pag-dopo { text-shadow: 0 0 6px rgba(0,229,255,.7); }
-/* Nei temi chiari le copertine pastello hanno il testo scuro */
-:root[data-tema="pastello"] .copertina, :root[data-tema="carta"] .copertina { color: #3b3340; }
-:root[data-tema="pastello"] .copertina .locandina, :root[data-tema="carta"] .copertina .locandina { text-shadow: none; border-color: rgba(59,51,64,.35); }
-:root[data-tema="pastello"] .copertina .contatore, :root[data-tema="carta"] .copertina .contatore { background: rgba(255,255,255,.75); color: #3b3340; }
-:root[data-tema="pastello"] .copertina .contatore.nuove, :root[data-tema="carta"] .copertina .contatore.nuove { background: #e0142b; color: #fff; }
-:root[data-tema="pastello"] .copertina .fase, :root[data-tema="carta"] .copertina .fase { color: #fff; }
-:root[data-tema="pastello"] .cestino-basso, :root[data-tema="carta"] .cestino-basso { color: #b03a3a; border-color: #e3b3b3; }
+/* Nel tema Carta le copertine chiare hanno il testo scuro */
+:root[data-tema="carta"] .copertina { color: #3b3340; }
+:root[data-tema="carta"] .copertina .locandina { text-shadow: none; border-color: rgba(59,51,64,.35); }
+:root[data-tema="carta"] .copertina .contatore { background: rgba(255,255,255,.75); color: #3b3340; }
+:root[data-tema="carta"] .copertina .contatore.nuove { background: #e0142b; color: #fff; }
+:root[data-tema="carta"] .copertina .fase { color: #fff; }
+:root[data-tema="carta"] .cestino-basso { color: #b03a3a; border-color: #e3b3b3; }
 /* campioni dei temi nelle impostazioni */
 .temi button { display: flex; align-items: center; justify-content: center; gap: 8px; }
 .campione { width: 18px; height: 18px; border-radius: 50%; border: 1px solid rgba(128,128,128,.6); flex: none; }
 .c-scuro { background: linear-gradient(135deg,#0f0f0f 50%,#8e2433 50%); }
-.c-pastello { background: linear-gradient(135deg,#eef4f3 50%,#b8e0d2 50%); }
 .c-carta { background: linear-gradient(135deg,#f4ecd8 50%,#e2c2a8 50%); }
 .c-fluo { background: conic-gradient(#ff2bd6 0 25%,#00e5ff 0 50%,#39ff14 0 75%,#ffe600 0); box-shadow: 0 0 6px #ff2bd6; }
 /* testata dell'idea: la data su una riga sola, la nota si accorcia se non c'è posto */
@@ -356,8 +346,49 @@ header, .icona, .modifica-testata { color: var(--testo-testata); }
 #dett-titolo { flex: 0 0 auto; }
 #vista-dettaglio .nota-testata { flex: 1 1 0; }
 :root[data-tema="fluo"] .nuova-testata { background: #ff2bd6; color: #fff; box-shadow: 0 0 10px rgba(255,43,214,.6); }
-:root[data-tema="pastello"] .nuova-testata { background: #4f9384; color: #fff; }
-:root[data-tema="pastello"] .scheda.da-integrare { border-left-color: #e0957a; }
 /* v30: la testata dell'idea non esce mai dallo schermo: se serve, la data si accorcia con i puntini */
 #dett-titolo { flex: 0 1 auto; }
 #vista-dettaglio header > button { flex: none; }
+
+/* ---- v31: Pergamena (al posto di Pastello): carta antica, inchiostro bruno, rubriche rosse,
+   copertine come miniature (vermiglio, lapislazzuli, verde, oro), caratteri da codice medievale ---- */
+:root[data-tema="pergamena"] {
+  color-scheme: light;
+  --fondo: #ecd9ad; --testata: #dcc08a; --carta: #f6e9c8; --testo: #3b2412; --tenue: #7a5a36;
+  --sipario: #9e2a1e; --oro: #a8771f; --bordo: #c9a66b; --ok: #3f6b2a; --errore: #a3241c;
+  --ombra: 0 1px 4px rgba(90,55,20,.25);
+  --testo-testata: #3b2412; --spett-fondo: #efe0bb; --dramm-fondo: #e3e2c0;
+  --verde-pag: #3f6b2a; --blu-pag: #24407a; --sinossi-fondo: #f3dfa8;
+  --medievale: "Uncial Antiqua", "IM Fell English", Georgia, serif;
+}
+:root[data-tema="pergamena"], :root[data-tema="pergamena"] body {
+  background:
+    radial-gradient(ellipse at 15% 8%, rgba(255,248,222,.75), transparent 55%),
+    radial-gradient(ellipse at 85% 95%, rgba(150,95,35,.28), transparent 60%),
+    radial-gradient(ellipse at 95% 20%, rgba(170,120,50,.18), transparent 45%),
+    #ecd9ad;
+  background-attachment: fixed;
+}
+:root[data-tema="pergamena"] body { font-family: "IM Fell English", Georgia, serif; }
+:root[data-tema="pergamena"] header {
+  background: linear-gradient(#e2c891, #d5b679); border-bottom: 3px double #8a5a2b;
+}
+:root[data-tema="pergamena"] header h1 { font-family: var(--medievale); color: #9e2a1e; font-size: 24px; letter-spacing: .02em; }
+:root[data-tema="pergamena"] h2 { font-family: var(--medievale); color: #9e2a1e; }
+:root[data-tema="pergamena"] .scheda { background: #f6e9c8; border: 1px solid #b8925a; box-shadow: inset 0 0 0 3px #f6e9c8, inset 0 0 0 4px #d4b47c, 0 1px 4px rgba(90,55,20,.25); }
+:root[data-tema="pergamena"] .copertina { color: #f8ebc6; border: 2px solid #c79a3a; box-shadow: inset 0 0 0 1px rgba(255,230,160,.5); }
+:root[data-tema="pergamena"] .copertina .locandina { font-family: var(--medievale); text-shadow: 0 1px 1px rgba(0,0,0,.4); border-color: rgba(232,196,110,.8); }
+:root[data-tema="pergamena"] .copertina .contatore { background: rgba(246,233,200,.9); color: #3b2412; }
+:root[data-tema="pergamena"] .copertina .contatore.nuove { background: #c0281c; color: #fff; }
+:root[data-tema="pergamena"] .copertina .fase { font-family: "IM Fell English", Georgia, serif; text-transform: none; letter-spacing: 0; font-size: 12px; background: rgba(59,36,18,.6); color: #f8ebc6; }
+:root[data-tema="pergamena"] .nuova-testata { background: #9e2a1e; color: #f8ebc6; font-family: var(--medievale); }
+:root[data-tema="pergamena"] .principale { font-family: var(--medievale); }
+:root[data-tema="pergamena"] .titolo-piccolo { font-family: "IM Fell English", Georgia, serif; color: #6b4423; }
+:root[data-tema="pergamena"] .pagine button { font-family: var(--medievale); background: #f6e9c8; }
+:root[data-tema="pergamena"] .cestino-basso { color: #a3241c; border-color: #d29a8a; }
+/* il testo dell'idea comincia con un capolettera rosso, come nei codici miniati */
+:root[data-tema="pergamena"] .dett-testo::first-letter {
+  font-family: "UnifrakturMaguntia", var(--medievale); color: #9e2a1e; float: left;
+  font-size: 3.1em; line-height: .85; padding: 4px 6px 0 0;
+}
+.c-pergamena { background: linear-gradient(135deg,#ecd9ad 50%,#9e2a1e 50%); border-color: #a8771f; }
