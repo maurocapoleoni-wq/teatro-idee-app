@@ -425,3 +425,11 @@ header, .icona, .modifica-testata { color: var(--testo-testata); }
   text-shadow: 1px 0 0 #a3241c, -1px 0 0 #a3241c, 0 1px 0 #a3241c, 0 -1px 0 #a3241c, 0 0 6px rgba(244,207,99,.5);
 }
 :root[data-tema="carta"] .copertina.senza-opera .fase { color: #f8ebc6; background: rgba(163,36,28,.85); }
+/* v38: i Magi più visibili: velo più leggero, schede un po' più trasparenti */
+:root[data-tema="carta"] #vista-lista {
+  background:
+    linear-gradient(rgba(244,236,216,.18), rgba(244,236,216,.3)),
+    url("sfondo-magi.webp") center 30% / cover no-repeat;
+}
+:root[data-tema="carta"] #vista-lista header { background: rgba(232,220,192,.8); }
+:root[data-tema="carta"] #vista-lista .scheda { background: rgba(251,245,230,.82); }
