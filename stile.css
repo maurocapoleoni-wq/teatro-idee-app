@@ -512,3 +512,17 @@ header, .icona, .modifica-testata { color: var(--testo-testata); }
 :root[data-tema="personale"] #vista-lista .scheda { background: rgba(20,20,24,var(--schede-personale,.8)); border: 1px solid rgba(230,176,78,.35); }
 :root[data-tema="personale"] #vista-lista .info { text-shadow: 0 1px 2px #000, 0 0 6px rgba(0,0,0,.85); }
 .personale-box label { margin-top: 10px; }
+/* v44: Personale, la pagina dell'idea (dialogo con lo spettatore) ha lo stesso sfondo della prima pagina;
+   fumetti, testata e riquadro in basso seguono la trasparenza scelta per le schede */
+:root[data-tema="personale"] #vista-dettaglio {
+  background:
+    linear-gradient(rgba(8,8,10,var(--velo-personale,.35)), rgba(8,8,10,calc(var(--velo-personale,.35) + .12))),
+    var(--sfondo-personale, none) center / cover no-repeat, #0f0f0f;
+}
+:root[data-tema="personale"] #vista-dettaglio header { background: rgba(10,10,12,.6); }
+:root[data-tema="personale"] #vista-dettaglio .compositore { background: rgba(12,12,14,.7); }
+:root[data-tema="personale"] #vista-dettaglio .osservazioni li { background: rgba(26,26,30,var(--schede-personale,.8)); }
+:root[data-tema="personale"] #vista-dettaglio .osservazioni li.spett { background: rgba(29,26,46,var(--schede-personale,.8)); }
+:root[data-tema="personale"] #vista-dettaglio .osservazioni li.spett.dramm { background: rgba(21,39,42,var(--schede-personale,.8)); }
+:root[data-tema="personale"] #vista-dettaglio main { text-shadow: 0 1px 2px #000, 0 0 6px rgba(0,0,0,.85); }
+:root[data-tema="personale"] #vista-dettaglio .modifica-box textarea { text-shadow: none; }
