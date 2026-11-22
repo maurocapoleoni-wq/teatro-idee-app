@@ -445,3 +445,41 @@ header, .icona, .modifica-testata { color: var(--testo-testata); }
 :root[data-tema="scuro"] #vista-lista .barra-cerca input, :root[data-tema="scuro"] #vista-lista .barra-cerca select { background-color: rgba(30,30,34,.85); }
 :root[data-tema="scuro"] .copertina.senza-opera { box-shadow: inset 0 0 0 1px rgba(240,226,196,.25); }
 :root[data-tema="scuro"] .copertina.senza-opera .locandina { text-shadow: 0 1px 3px rgba(0,0,0,.85), 0 0 8px rgba(0,0,0,.6); }
+/* ---- v40: Commedia. Fondo scuro infernale (fiamme, porpora delle vesti, oro della luce),
+   prima pagina con la scena di Dante e Virgilio, copertine come in Pergamena ---- */
+:root[data-tema="commedia"] {
+  color-scheme: dark;
+  --fondo: #140806; --testata: #140806; --carta: #22120e; --testo: #f3e6d0; --tenue: #c0a588;
+  --sipario: #a8281c; --oro: #e6b04e; --bordo: #4a2a1c; --ok: #9fcf7a; --errore: #ff8a70;
+  --ombra: 0 1px 6px rgba(0,0,0,.5);
+  --testo-testata: #f3e6d0; --spett-fondo: #2a1620; --dramm-fondo: #1a2320;
+  --verde-pag: #8fd16a; --blu-pag: #7fb2ff; --sinossi-fondo: #3a2410;
+  --medievale: "Uncial Antiqua", "IM Fell English", Georgia, serif;
+}
+:root[data-tema="commedia"] body { font-family: "IM Fell English", Georgia, serif; }
+:root[data-tema="commedia"] header { border-bottom: 2px solid #6b3a1c; }
+:root[data-tema="commedia"] header h1 { font-family: var(--medievale); color: #e6b04e; font-size: 24px; text-shadow: 0 0 10px rgba(230,176,78,.45); }
+:root[data-tema="commedia"] h2 { font-family: var(--medievale); color: #e6b04e; }
+:root[data-tema="commedia"] .nuova-testata { background: #a8281c; color: #f8ebc6; font-family: var(--medievale); }
+:root[data-tema="commedia"] .principale { font-family: var(--medievale); }
+:root[data-tema="commedia"] .pagine button { font-family: var(--medievale); }
+:root[data-tema="commedia"] .titolo-piccolo { font-family: "IM Fell English", Georgia, serif; color: var(--tenue); }
+:root[data-tema="commedia"] .dett-testo::first-letter {
+  font-family: "UnifrakturMaguntia", var(--medievale); color: #e6b04e; float: left;
+  font-size: 3.1em; line-height: .85; padding: 4px 6px 0 0;
+}
+:root[data-tema="commedia"] #vista-lista {
+  background:
+    linear-gradient(rgba(10,4,3,.2), rgba(10,4,3,.42)),
+    url("sfondo-commedia.webp") center 40% / cover no-repeat;
+}
+:root[data-tema="commedia"] #vista-lista header { background: rgba(20,8,6,.6); }
+:root[data-tema="commedia"] #vista-lista .scheda { background: rgba(34,18,14,.82); border: 1px solid rgba(230,176,78,.35); }
+:root[data-tema="commedia"] #vista-lista .barra-cerca input, :root[data-tema="commedia"] #vista-lista .barra-cerca select { background-color: rgba(34,18,14,.85); }
+/* copertine come in Pergamena: miniature con cornice d'oro e scrittura onciale */
+:root[data-tema="commedia"] .copertina { color: #f8ebc6; border: 2px solid #c79a3a; box-shadow: inset 0 0 0 1px rgba(255,230,160,.5); }
+:root[data-tema="commedia"] .copertina .locandina { font-family: var(--medievale); text-shadow: 0 1px 1px rgba(0,0,0,.4); border-color: rgba(232,196,110,.8); }
+:root[data-tema="commedia"] .copertina .contatore { background: rgba(246,233,200,.9); color: #3b2412; }
+:root[data-tema="commedia"] .copertina .contatore.nuove { background: #c0281c; color: #fff; }
+:root[data-tema="commedia"] .copertina .fase { font-family: "IM Fell English", Georgia, serif; text-transform: none; letter-spacing: 0; font-size: 12px; background: rgba(59,36,18,.6); color: #f8ebc6; }
+.c-commedia { background: linear-gradient(160deg,#3a2a5a 0%,#e6b04e 45%,#a8281c 70%,#140806 100%); border-color: #c79a3a; }
