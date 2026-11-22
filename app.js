@@ -256,12 +256,19 @@ const TINTE_CHIARE = { pergamena: ['#9e2a1e', '#24407a', '#3f6b2a', '#a8771f', '
   fluo: ['#ff2bd6', '#00e5ff', '#39ff14', '#ffe600', '#ff7a00', '#b026ff', '#ff3864', '#00ffa3'],
   carta: ['#e2c2a8', '#c5d0d8', '#cfd6b4', '#d8c5d6', '#e6cfa6', '#bfd6cf', '#e0b9ac', '#cbc6dc'] };
 // Pergamena e Scuro: le idee senza opera («opera attiva») si alternano verde e blu, come le miniature.
-// Scuro: sfumature verticali, dal verde all'arancio e dal rosso al blu, con i bordi più scuri.
-// Carta: blu lapislazzuli come lo sfondo delle iniziali miniate.
+// Scuro: i colori di una nebulosa (ruggine, oro, grigio azzurro, crema su fondo nero), solo sfumature CSS.
+const STELLE = 'radial-gradient(circle at 12% 18%, #fff 0 1px, transparent 1.6px), radial-gradient(circle at 86% 14%, #fff 0 1.2px, transparent 2px), radial-gradient(circle at 64% 88%, #ffe9c9 0 1px, transparent 1.6px), radial-gradient(circle at 40% 8%, #fff 0 .8px, transparent 1.4px), radial-gradient(circle at 92% 58%, #fff 0 .9px, transparent 1.5px), ';
 const SENZA_OPERA = { pergamena: ['#3f6b2a', '#24407a'],
   carta: ['radial-gradient(circle at 50% 45%, #2f56b0 0%, #1d3a86 55%, #12265c 100%)'],
-  scuro: ['linear-gradient(180deg, #0f3d22 0%, #23874a 30%, #c8621a 72%, #6a2506 100%)',
-          'linear-gradient(180deg, #5e0f06 0%, #b2301a 30%, #3448a8 72%, #121c4a 100%)'] };
+  scuro: [
+    STELLE + 'radial-gradient(ellipse at 30% 35%, rgba(240,226,196,.85) 0%, rgba(201,138,58,.55) 18%, transparent 45%),' +
+    'radial-gradient(ellipse at 80% 75%, rgba(150,52,22,.95) 0%, transparent 50%),' +
+    'radial-gradient(ellipse at 10% 90%, rgba(110,128,150,.8) 0%, transparent 45%),' +
+    'linear-gradient(160deg, #2a1410 0%, #5c2414 40%, #3b3a44 75%, #0e0c12 100%)',
+    STELLE + 'radial-gradient(ellipse at 70% 30%, rgba(236,220,190,.8) 0%, rgba(214,150,70,.5) 20%, transparent 48%),' +
+    'radial-gradient(ellipse at 20% 70%, rgba(140,44,20,.95) 0%, transparent 52%),' +
+    'radial-gradient(ellipse at 90% 95%, rgba(96,116,140,.85) 0%, transparent 45%),' +
+    'linear-gradient(200deg, #1c1218 0%, #4a2a20 45%, #6b2a14 70%, #0c0a10 100%)'] };
 function tinta(opera, i = 0) {
   const alterna = SENZA_OPERA[document.documentElement.dataset.tema];
   if (!opera && alterna) { const p = alterna[i % alterna.length]; return /gradient/.test(p) ? p : `linear-gradient(135deg, ${p}, ${p}cc)`; }
