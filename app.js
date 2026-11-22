@@ -682,6 +682,9 @@ function applicaPersonale() {
   const velo = leggi('velo-personale', 35);
   r.setProperty('--velo-personale', velo / 100);
   if ($('pers-velo')) $('pers-velo').value = velo;
+  const trasp = leggi('trasp-personale', 20);
+  r.setProperty('--schede-personale', (100 - trasp) / 100);
+  if ($('pers-trasp')) $('pers-trasp').value = trasp;
   if ($('pers-anteprima')) { $('pers-anteprima').hidden = !img; if (img) $('pers-anteprima').src = img; }
 }
 $('pers-scegli').addEventListener('click', () => $('pers-file').click());
@@ -705,6 +708,7 @@ $('pers-file').addEventListener('change', (e) => {
   im.onerror = () => { URL.revokeObjectURL(url); mostra('pers-esito', 'Non riesco ad aprire questa immagine.', 'errore'); };
   im.src = url; e.target.value = '';
 });
+$('pers-trasp').addEventListener('input', (e) => { scrivi('trasp-personale', +e.target.value); applicaPersonale(); });
 $('pers-velo').addEventListener('input', (e) => { scrivi('velo-personale', +e.target.value); applicaPersonale(); });
 document.querySelectorAll('#tema button').forEach((b) => b.addEventListener('click', () => {
   scrivi('tema', b.dataset.t); applicaTema(b.dataset.t); disegnaTutto();

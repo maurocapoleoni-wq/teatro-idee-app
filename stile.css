@@ -508,3 +508,7 @@ header, .icona, .modifica-testata { color: var(--testo-testata); }
 :root[data-tema="commedia"] #vista-lista .scheda { background: rgba(20,8,6,.28); border-color: rgba(230,176,78,.45); box-shadow: none; }
 :root[data-tema="commedia"] #vista-lista .info { text-shadow: 0 1px 2px #000, 0 0 6px rgba(0,0,0,.9), 0 0 12px rgba(0,0,0,.7); }
 :root[data-tema="commedia"] #vista-lista .info .titolo { color: #fff6e6; }
+/* v43: Personale, trasparenza delle schede regolabile dalle impostazioni; il testo ha un'ombra per restare leggibile */
+:root[data-tema="personale"] #vista-lista .scheda { background: rgba(20,20,24,var(--schede-personale,.8)); border: 1px solid rgba(230,176,78,.35); }
+:root[data-tema="personale"] #vista-lista .info { text-shadow: 0 1px 2px #000, 0 0 6px rgba(0,0,0,.85); }
+.personale-box label { margin-top: 10px; }
