@@ -483,3 +483,23 @@ header, .icona, .modifica-testata { color: var(--testo-testata); }
 :root[data-tema="commedia"] .copertina .contatore.nuove { background: #c0281c; color: #fff; }
 :root[data-tema="commedia"] .copertina .fase { font-family: "IM Fell English", Georgia, serif; text-transform: none; letter-spacing: 0; font-size: 12px; background: rgba(59,36,18,.6); color: #f8ebc6; }
 .c-commedia { background: linear-gradient(160deg,#3a2a5a 0%,#e6b04e 45%,#a8281c 70%,#140806 100%); border-color: #c79a3a; }
+/* ---- v41: Personale. Base scura, sfondo della prima pagina scelto dal telefono,
+   velo regolabile, copertine come in Pergamena ---- */
+:root[data-tema="personale"] { --medievale: "Uncial Antiqua", "IM Fell English", Georgia, serif; }
+:root[data-tema="personale"] #vista-lista {
+  background:
+    linear-gradient(rgba(8,8,10,var(--velo-personale,.35)), rgba(8,8,10,calc(var(--velo-personale,.35) + .12))),
+    var(--sfondo-personale, none) center / cover no-repeat, #0f0f0f;
+}
+:root[data-tema="personale"] #vista-lista header { background: rgba(10,10,12,.6); }
+:root[data-tema="personale"] #vista-lista .scheda { background: rgba(26,26,30,.82); }
+:root[data-tema="personale"] #vista-lista .barra-cerca input, :root[data-tema="personale"] #vista-lista .barra-cerca select { background-color: rgba(30,30,34,.85); }
+:root[data-tema="personale"] .copertina { color: #f8ebc6; border: 2px solid #c79a3a; box-shadow: inset 0 0 0 1px rgba(255,230,160,.5); }
+:root[data-tema="personale"] .copertina .locandina { font-family: var(--medievale); text-shadow: 0 1px 1px rgba(0,0,0,.4); border-color: rgba(232,196,110,.8); }
+:root[data-tema="personale"] .copertina .contatore { background: rgba(246,233,200,.9); color: #3b2412; }
+:root[data-tema="personale"] .copertina .contatore.nuove { background: #c0281c; color: #fff; }
+:root[data-tema="personale"] .copertina .fase { font-family: "IM Fell English", Georgia, serif; text-transform: none; letter-spacing: 0; font-size: 12px; background: rgba(59,36,18,.6); color: #f8ebc6; }
+.c-personale { background: conic-gradient(#888 0 25%, #555 0 50%, #888 0 75%, #555 0); position: relative; }
+.personale-box { margin-top: 10px; padding: 10px 12px; border: 1px dashed var(--bordo); border-radius: 10px; }
+.personale-box input[type=range] { width: 100%; accent-color: var(--sipario); }
+.pers-anteprima { display: block; width: 100%; max-height: 160px; object-fit: cover; border-radius: 8px; margin: 6px 0 8px; }

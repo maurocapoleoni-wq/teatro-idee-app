@@ -253,13 +253,14 @@ function el(tag, classe, testo) { const e = document.createElement(tag); if (cla
 const TINTE = ['#5b1a24', '#2e4a62', '#4a5d23', '#6b3f69', '#7a4b1e', '#1f5c57', '#7d2e2e', '#3d3a6b'];
 // Nei temi chiari le copertine usano colori pastello (stesso ordine: ogni opera tiene il suo colore).
 const TINTE_CHIARE = { pergamena: ['#9e2a1e', '#24407a', '#3f6b2a', '#a8771f', '#5e2d5e', '#6b4423', '#1f5c57', '#7a1f3d'],
+  personale: ['#9e2a1e', '#24407a', '#3f6b2a', '#a8771f', '#5e2d5e', '#6b4423', '#1f5c57', '#7a1f3d'],
   commedia: ['#9e2a1e', '#24407a', '#3f6b2a', '#a8771f', '#5e2d5e', '#6b4423', '#1f5c57', '#7a1f3d'],
   fluo: ['#ff2bd6', '#00e5ff', '#39ff14', '#ffe600', '#ff7a00', '#b026ff', '#ff3864', '#00ffa3'],
   carta: ['#e2c2a8', '#c5d0d8', '#cfd6b4', '#d8c5d6', '#e6cfa6', '#bfd6cf', '#e0b9ac', '#cbc6dc'] };
 // Pergamena e Scuro: le idee senza opera («opera attiva») si alternano verde e blu, come le miniature.
 // Scuro: i colori di una nebulosa (ruggine, oro, grigio azzurro, crema su fondo nero), solo sfumature CSS.
 const STELLE = 'radial-gradient(circle at 12% 18%, #fff 0 1px, transparent 1.6px), radial-gradient(circle at 86% 14%, #fff 0 1.2px, transparent 2px), radial-gradient(circle at 64% 88%, #ffe9c9 0 1px, transparent 1.6px), radial-gradient(circle at 40% 8%, #fff 0 .8px, transparent 1.4px), radial-gradient(circle at 92% 58%, #fff 0 .9px, transparent 1.5px), ';
-const SENZA_OPERA = { pergamena: ['#3f6b2a', '#24407a'], commedia: ['#3f6b2a', '#24407a'],
+const SENZA_OPERA = { pergamena: ['#3f6b2a', '#24407a'], commedia: ['#3f6b2a', '#24407a'], personale: ['#3f6b2a', '#24407a'],
   carta: ['radial-gradient(circle at 50% 45%, #2f56b0 0%, #1d3a86 55%, #12265c 100%)'],
   scuro: [
     STELLE + 'radial-gradient(ellipse at 30% 35%, rgba(240,226,196,.85) 0%, rgba(201,138,58,.55) 18%, transparent 45%),' +
@@ -662,14 +663,49 @@ function disegnaCancellate() {
 }
 
 // ---------- Aspetto: tema dei colori (resta solo su questo telefono) ----------
-const TEMI = { scuro: '#0f0f0f', pergamena: '#dcc08a', carta: '#e8dcc0', fluo: '#07060d', commedia: '#140806' };
+const TEMI = { scuro: '#0f0f0f', pergamena: '#dcc08a', carta: '#e8dcc0', fluo: '#07060d', commedia: '#140806', personale: '#0f0f0f' };
 function applicaTema(t) {
   t = { pastello: 'pergamena', notte: 'fluo' }[t] || t;
   if (!TEMI[t]) t = 'scuro';
   document.documentElement.dataset.tema = t;
   const m = document.querySelector('meta[name="theme-color"]'); if (m) m.content = TEMI[t];
   document.querySelectorAll('#tema button').forEach((b) => b.classList.toggle('scelta', b.dataset.t === t));
+  $('personale-box').hidden = t !== 'personale';
+  applicaPersonale();
 }
+
+// ---------- Tema Personale: un'immagine scelta dal telefono ----------
+// L'immagine resta solo su questo telefono (memoria dell'app): non va mai su GitHub.
+function applicaPersonale() {
+  const r = document.documentElement.style, img = leggi('sfondo-personale', '');
+  if (img) r.setProperty('--sfondo-personale', `url("${img}")`); else r.removeProperty('--sfondo-personale');
+  const velo = leggi('velo-personale', 35);
+  r.setProperty('--velo-personale', velo / 100);
+  if ($('pers-velo')) $('pers-velo').value = velo;
+  if ($('pers-anteprima')) { $('pers-anteprima').hidden = !img; if (img) $('pers-anteprima').src = img; }
+}
+$('pers-scegli').addEventListener('click', () => $('pers-file').click());
+$('pers-file').addEventListener('change', (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  mostra('pers-esito', "Preparo l'immagine…", 'tenue');
+  const url = URL.createObjectURL(f), im = new Image();
+  im.onload = () => {
+    // Rimpicciolita (lato lungo 1280 px) perché stia nella memoria dell'app.
+    const k = Math.min(1, 1280 / Math.max(im.width, im.height));
+    const c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+    c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+    let dati = c.toDataURL('image/jpeg', .82);
+    try { localStorage.setItem('sfondo-personale', JSON.stringify(dati)); }
+    catch {
+      try { dati = c.toDataURL('image/jpeg', .6); localStorage.setItem('sfondo-personale', JSON.stringify(dati)); }
+      catch { mostra('pers-esito', "L'immagine è troppo grande per la memoria dell'app: prova con un'altra.", 'errore'); return; }
+    }
+    applicaPersonale(); mostra('pers-esito', 'Sfondo salvato su questo telefono ✓', 'ok');
+  };
+  im.onerror = () => { URL.revokeObjectURL(url); mostra('pers-esito', 'Non riesco ad aprire questa immagine.', 'errore'); };
+  im.src = url; e.target.value = '';
+});
+$('pers-velo').addEventListener('input', (e) => { scrivi('velo-personale', +e.target.value); applicaPersonale(); });
 document.querySelectorAll('#tema button').forEach((b) => b.addEventListener('click', () => {
   scrivi('tema', b.dataset.t); applicaTema(b.dataset.t); disegnaTutto();
 }));

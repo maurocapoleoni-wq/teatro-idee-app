@@ -131,6 +131,16 @@
         <button data-t="carta"><span class="campione c-carta"></span>Carta</button>
         <button data-t="fluo"><span class="campione c-fluo"></span>Fluo</button>
         <button data-t="commedia"><span class="campione c-commedia"></span>Commedia</button>
+        <button data-t="personale"><span class="campione c-personale"></span>Personale</button>
+      </div>
+      <div id="personale-box" class="personale-box" hidden>
+        <p class="tenue piccolo">Scegli un'immagine dalla galleria: diventa lo sfondo della prima pagina. Resta solo su questo telefono.</p>
+        <img id="pers-anteprima" class="pers-anteprima" alt="Sfondo scelto" hidden>
+        <button id="pers-scegli">🖼 Scegli l'immagine</button>
+        <input id="pers-file" type="file" accept="image/*" hidden>
+        <label for="pers-velo">Velo sopra l'immagine (a sinistra si vede di più)</label>
+        <input id="pers-velo" type="range" min="0" max="80" step="5" value="35">
+        <p id="pers-esito" class="esito" role="status" aria-live="polite"></p>
       </div>
       <h2>Lo spettatore</h2>
       <p id="frequenza-attuale" class="tenue"></p>
@@ -145,7 +155,7 @@
       <ul id="cancellate" class="cancellate"></ul>
       <p id="esito-cancellate" class="esito" role="status" aria-live="polite"></p>
       <button id="dimentica" class="pericolo">Togli la chiave da questo telefono</button>
-      <p class="tenue centro">Versione dell'app: 40</p>
+      <p class="tenue centro">Versione dell'app: 41</p>
     </main>
   </section>
 
