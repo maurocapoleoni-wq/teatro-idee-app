@@ -503,3 +503,8 @@ header, .icona, .modifica-testata { color: var(--testo-testata); }
 .personale-box { margin-top: 10px; padding: 10px 12px; border: 1px dashed var(--bordo); border-radius: 10px; }
 .personale-box input[type=range] { width: 100%; accent-color: var(--sipario); }
 .pers-anteprima { display: block; width: 100%; max-height: 160px; object-fit: cover; border-radius: 8px; margin: 6px 0 8px; }
+/* v42: Commedia, schede molto trasparenti così il dipinto si vede dietro il testo dell'idea;
+   il testo ha un'ombra scura per restare leggibile */
+:root[data-tema="commedia"] #vista-lista .scheda { background: rgba(20,8,6,.28); border-color: rgba(230,176,78,.45); box-shadow: none; }
+:root[data-tema="commedia"] #vista-lista .info { text-shadow: 0 1px 2px #000, 0 0 6px rgba(0,0,0,.9), 0 0 12px rgba(0,0,0,.7); }
+:root[data-tema="commedia"] #vista-lista .info .titolo { color: #fff6e6; }
