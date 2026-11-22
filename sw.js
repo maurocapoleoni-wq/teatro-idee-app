@@ -1,8 +1,8 @@
 // Tiene in memoria l'app per aprirla anche senza rete. Le chiamate a GitHub non passano di qui.
 // Con la rete chiede sempre la versione più recente (saltando la cache del browser);
 // senza rete usa la copia salvata.
-const VERSIONE = 'idee-v36';
-const FILE = ['./', 'index.html', 'stile.css', 'app.js', 'manifest.webmanifest', 'icona-192.png', 'icona-512.png', 'sfondo-bosch.webp'];
+const VERSIONE = 'idee-v37';
+const FILE = ['./', 'index.html', 'stile.css', 'app.js', 'manifest.webmanifest', 'icona-192.png', 'icona-512.png', 'sfondo-bosch.webp', 'sfondo-magi.webp'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(VERSIONE).then((c) => c.addAll(FILE.map((f) => new Request(f, { cache: 'reload' })))));

@@ -257,12 +257,14 @@ const TINTE_CHIARE = { pergamena: ['#9e2a1e', '#24407a', '#3f6b2a', '#a8771f', '
   carta: ['#e2c2a8', '#c5d0d8', '#cfd6b4', '#d8c5d6', '#e6cfa6', '#bfd6cf', '#e0b9ac', '#cbc6dc'] };
 // Pergamena e Scuro: le idee senza opera («opera attiva») si alternano verde e blu, come le miniature.
 // Scuro: sfumature verticali, dal verde all'arancio e dal rosso al blu, con i bordi più scuri.
+// Carta: blu lapislazzuli come lo sfondo delle iniziali miniate.
 const SENZA_OPERA = { pergamena: ['#3f6b2a', '#24407a'],
+  carta: ['radial-gradient(circle at 50% 45%, #2f56b0 0%, #1d3a86 55%, #12265c 100%)'],
   scuro: ['linear-gradient(180deg, #0f3d22 0%, #23874a 30%, #c8621a 72%, #6a2506 100%)',
           'linear-gradient(180deg, #5e0f06 0%, #b2301a 30%, #3448a8 72%, #121c4a 100%)'] };
 function tinta(opera, i = 0) {
   const alterna = SENZA_OPERA[document.documentElement.dataset.tema];
-  if (!opera && alterna) { const p = alterna[i % alterna.length]; return p.startsWith('linear') ? p : `linear-gradient(135deg, ${p}, ${p}cc)`; }
+  if (!opera && alterna) { const p = alterna[i % alterna.length]; return /gradient/.test(p) ? p : `linear-gradient(135deg, ${p}, ${p}cc)`; }
   const chiare = TINTE_CHIARE[document.documentElement.dataset.tema];
   if (!opera) return chiare ? ({ carta: 'linear-gradient(135deg,#e8d9bb,#d8c49c)', fluo: 'linear-gradient(135deg,#ff2bd6,#00e5ff)' }[document.documentElement.dataset.tema] || 'linear-gradient(135deg,#7a5a36,#5a3d20)') : 'linear-gradient(135deg,#4b3f39,#7a6a60)';
   let h = 0; for (const c of opera) h = (h * 31 + c.charCodeAt(0)) >>> 0;
@@ -343,9 +345,12 @@ function disegnaLista() {
   }
   ul.replaceChildren(...visibili.map((n, i) => {
     const li = el('li', 'scheda' + (n.cartella === 'inbox' ? ' da-integrare' : '')); li.tabIndex = 0;
-    const cop = el('div', 'copertina'); cop.style.background = tinta(n.opera, inizio + i);
+    const cop = el('div', 'copertina' + (n.opera ? '' : ' senza-opera')); cop.style.background = tinta(n.opera, inizio + i);
     const fase = FASI[statoDi(n.nome)] || FASI.spettatore;
-    cop.append(el('span', 'maschera', fase.icona), el('span', 'locandina', n.opera ? nomeOpera(n.opera) : 'Opera attiva'),
+    // «Opera attiva» con il capolettera a parte: nel tema Carta diventa una lettera miniata.
+    const loc = el('span', 'locandina', n.opera ? nomeOpera(n.opera) : 'pera attiva');
+    if (!n.opera) loc.prepend(el('span', 'capolettera', 'O'));
+    cop.append(el('span', 'maschera', fase.icona), loc,
       el('span', 'fase fase-' + statoDi(n.nome), fase.nome));
     const no = dialogoDi(n.nome).length;
     const info0 = [];
