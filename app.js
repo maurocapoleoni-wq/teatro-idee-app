@@ -256,10 +256,13 @@ const TINTE_CHIARE = { pergamena: ['#9e2a1e', '#24407a', '#3f6b2a', '#a8771f', '
   fluo: ['#ff2bd6', '#00e5ff', '#39ff14', '#ffe600', '#ff7a00', '#b026ff', '#ff3864', '#00ffa3'],
   carta: ['#e2c2a8', '#c5d0d8', '#cfd6b4', '#d8c5d6', '#e6cfa6', '#bfd6cf', '#e0b9ac', '#cbc6dc'] };
 // Pergamena e Scuro: le idee senza opera («opera attiva») si alternano verde e blu, come le miniature.
-const SENZA_OPERA = { pergamena: ['#3f6b2a', '#24407a'], scuro: ['#3d6b2a', '#25507e'] };
+// Scuro: sfumature verticali, dal verde all'arancio e dal rosso al blu, con i bordi più scuri.
+const SENZA_OPERA = { pergamena: ['#3f6b2a', '#24407a'],
+  scuro: ['linear-gradient(180deg, #0f3d22 0%, #23874a 30%, #c8621a 72%, #6a2506 100%)',
+          'linear-gradient(180deg, #5e0f06 0%, #b2301a 30%, #3448a8 72%, #121c4a 100%)'] };
 function tinta(opera, i = 0) {
   const alterna = SENZA_OPERA[document.documentElement.dataset.tema];
-  if (!opera && alterna) { const p = alterna[i % alterna.length]; return `linear-gradient(135deg, ${p}, ${p}cc)`; }
+  if (!opera && alterna) { const p = alterna[i % alterna.length]; return p.startsWith('linear') ? p : `linear-gradient(135deg, ${p}, ${p}cc)`; }
   const chiare = TINTE_CHIARE[document.documentElement.dataset.tema];
   if (!opera) return chiare ? ({ carta: 'linear-gradient(135deg,#e8d9bb,#d8c49c)', fluo: 'linear-gradient(135deg,#ff2bd6,#00e5ff)' }[document.documentElement.dataset.tema] || 'linear-gradient(135deg,#7a5a36,#5a3d20)') : 'linear-gradient(135deg,#4b3f39,#7a6a60)';
   let h = 0; for (const c of opera) h = (h * 31 + c.charCodeAt(0)) >>> 0;
