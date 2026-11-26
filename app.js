@@ -271,7 +271,16 @@ const SENZA_OPERA = { pergamena: ['#3f6b2a', '#24407a'], commedia: ['#3f6b2a', '
     'radial-gradient(ellipse at 20% 70%, rgba(140,44,20,.95) 0%, transparent 52%),' +
     'radial-gradient(ellipse at 90% 95%, rgba(96,116,140,.85) 0%, transparent 45%),' +
     'linear-gradient(200deg, #1c1218 0%, #4a2a20 45%, #6b2a14 70%, #0c0a10 100%)'] };
+// Tema Fluo: copertine scure con il testo in quattro colori intensi, a rotazione nella pagina.
+// Le idee di un'opera vera prendono sempre lo stesso colore, così l'opera si riconosce.
+const NEON = ['#39ff14', '#4da3ff', '#ff3b5c', '#c04dff']; // verde, blu, rosso, viola
+function neonDi(opera, i = 0) {
+  if (!opera) return NEON[i % NEON.length];
+  let h = 0; for (const c of opera) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return NEON[h % NEON.length];
+}
 function tinta(opera, i = 0) {
+  if (document.documentElement.dataset.tema === 'fluo') return `radial-gradient(circle at 0% 0%, ${neonDi(opera, i)}26, transparent 65%), rgba(10,8,20,.55)`;
   const alterna = SENZA_OPERA[document.documentElement.dataset.tema];
   if (!opera && alterna) { const p = alterna[i % alterna.length]; return /gradient/.test(p) ? p : `linear-gradient(135deg, ${p}, ${p}cc)`; }
   const chiare = TINTE_CHIARE[document.documentElement.dataset.tema];
@@ -354,7 +363,7 @@ function disegnaLista() {
   }
   ul.replaceChildren(...visibili.map((n, i) => {
     const li = el('li', 'scheda' + (n.cartella === 'inbox' ? ' da-integrare' : '')); li.tabIndex = 0;
-    const cop = el('div', 'copertina' + (n.opera ? '' : ' senza-opera')); cop.style.background = tinta(n.opera, inizio + i);
+    const cop = el('div', 'copertina' + (n.opera ? '' : ' senza-opera')); cop.style.background = tinta(n.opera, inizio + i); cop.style.setProperty('--neon', neonDi(n.opera, inizio + i));
     const fase = FASI[statoDi(n.nome)] || FASI.spettatore;
     // «Opera attiva» con il capolettera a parte: nel tema Carta diventa una lettera miniata.
     const loc = el('span', 'locandina', n.opera ? nomeOpera(n.opera) : 'pera attiva');

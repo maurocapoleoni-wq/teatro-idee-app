@@ -319,11 +319,22 @@ header, .icona, .modifica-testata { color: var(--testo-testata); }
 }
 :root[data-tema="fluo"] h1 { color: #ff2bd6; text-shadow: 0 0 8px rgba(255,43,214,.7); }
 :root[data-tema="fluo"] .scheda { border-color: #3b2a6e; box-shadow: 0 0 8px rgba(0,229,255,.18); }
-:root[data-tema="fluo"] .copertina { color: #0a0814; }
-:root[data-tema="fluo"] .copertina .locandina { text-shadow: none; border-color: rgba(10,8,20,.45); }
-:root[data-tema="fluo"] .copertina .contatore { background: rgba(10,8,20,.8); color: #fff; }
+/* v48: copertine scure e semitrasparenti, testo nel colore neon della scheda (--neon, lo dà app.js) */
+:root[data-tema="fluo"] .copertina {
+  color: var(--neon, #39ff14);
+  border: 1px solid color-mix(in srgb, var(--neon, #39ff14) 55%, transparent);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--neon, #39ff14) 25%, transparent) inset;
+}
+:root[data-tema="fluo"] .copertina .locandina {
+  text-shadow: 0 0 4px color-mix(in srgb, var(--neon, #39ff14) 70%, transparent), 0 0 10px color-mix(in srgb, var(--neon, #39ff14) 35%, transparent);
+  border-color: color-mix(in srgb, var(--neon, #39ff14) 60%, transparent);
+}
+:root[data-tema="fluo"] .copertina .contatore { background: rgba(10,8,20,.85); color: #fff; }
 :root[data-tema="fluo"] .copertina .contatore.nuove { background: #ff1744; color: #fff; box-shadow: 0 0 8px #ff1744; }
-:root[data-tema="fluo"] .copertina .fase { color: #fff; background: rgba(10,8,20,.75); }
+:root[data-tema="fluo"] .copertina .fase {
+  color: var(--neon, #39ff14); background: rgba(10,8,20,.8);
+  border: 1px solid color-mix(in srgb, var(--neon, #39ff14) 70%, transparent);
+}
 :root[data-tema="fluo"] .principale { box-shadow: 0 0 10px rgba(255,43,214,.55); }
 :root[data-tema="fluo"] #pag-prima { text-shadow: 0 0 6px rgba(57,255,20,.7); }
 :root[data-tema="fluo"] #pag-dopo { text-shadow: 0 0 6px rgba(0,229,255,.7); }
