@@ -527,7 +527,7 @@ header, .icona, .modifica-testata { color: var(--testo-testata); }
 :root[data-tema="personale"] #vista-dettaglio main { text-shadow: 0 1px 2px #000, 0 0 6px rgba(0,0,0,.85); }
 :root[data-tema="personale"] #vista-dettaglio .modifica-box textarea { text-shadow: none; }
 
-/* ---- v45-v46: Fluo, bordo arcobaleno con un cerchietto di luce che gira in senso antiorario ---- */
+/* ---- v45-v47: Fluo, bordo arcobaleno; la luce che lo percorre è più sotto ---- */
 :root[data-tema="fluo"] .scheda {
   position: relative;
   border: 3px solid transparent;
@@ -536,28 +536,12 @@ header, .icona, .modifica-testata { color: var(--testo-testata); }
     conic-gradient(#ff1744, #ff9100, #ffea00, #39ff14, #00e5ff, #2979ff, #d500f9, #ff1744) border-box;
   box-shadow: 0 0 9px rgba(255,43,214,.3), 0 0 9px rgba(0,229,255,.2) inset;
 }
-/* la scheda non taglia più ciò che sporge, così l'alone del cerchietto si vede anche fuori dal bordo */
-:root[data-tema="fluo"] #vista-lista .scheda { overflow: visible; }
-/* il cerchietto: sta a metà dello spessore del bordo (1,5 px fuori dal bordo interno) */
-:root[data-tema="fluo"] .scheda::after {
-  content: ''; position: absolute; z-index: 2; pointer-events: none;
-  width: 7px; height: 7px; border-radius: 50%;
-  background: #fff;
+/* v47: una sola luce che percorre le schede una dopo l'altra (la muove app.js) */
+.luce-fluo { display: none; }
+:root[data-tema="fluo"] #vista-lista { position: relative; }
+:root[data-tema="fluo"] .luce-fluo {
+  display: block; position: absolute; left: 0; top: 0; z-index: 3; pointer-events: none;
+  width: 7px; height: 7px; border-radius: 50%; background: #fff; will-change: transform;
   box-shadow: 0 0 3px 2px #fff, 0 0 8px 4px rgba(255,255,255,.85), 0 0 16px 7px rgba(0,229,255,.55);
-  transform: translate(-50%, -50%);
-  animation: fluo-giro 7s linear infinite;
 }
-/* in senso antiorario: in alto da destra a sinistra, giù a sinistra, in basso verso destra, su a destra.
-   Le tappe sono proporzionate ai lati di una scheda del telefono, larga circa tre volte quanto è alta. */
-@keyframes fluo-giro {
-  0%   { left: calc(100% + 1.5px); top: -1.5px; }
-  38%  { left: -1.5px;             top: -1.5px; }
-  50%  { left: -1.5px;             top: calc(100% + 1.5px); }
-  88%  { left: calc(100% + 1.5px); top: calc(100% + 1.5px); }
-  100% { left: calc(100% + 1.5px); top: -1.5px; }
-}
-/* schede sfasate, così i cerchietti non camminano tutti in fila */
-:root[data-tema="fluo"] #vista-lista .scheda:nth-child(2)::after { animation-delay: -1.75s; }
-:root[data-tema="fluo"] #vista-lista .scheda:nth-child(3)::after { animation-delay: -3.5s; }
-:root[data-tema="fluo"] #vista-lista .scheda:nth-child(4)::after { animation-delay: -5.25s; }
-@media (prefers-reduced-motion: reduce) { :root[data-tema="fluo"] .scheda::after { animation: none; left: calc(100% + 1.5px); top: -1.5px; } }
+:root[data-tema="fluo"] .luce-fluo[hidden] { display: none; }

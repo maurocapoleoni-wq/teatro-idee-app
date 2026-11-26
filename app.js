@@ -390,8 +390,111 @@ function adattaSchede() {
     let righe = parseInt(getComputedStyle(t).webkitLineClamp, 10) || 3;
     while (righe > 1 && info.scrollHeight > info.clientHeight + 1) t.style.webkitLineClamp = String(--righe);
   });
+  aggiornaLuce();
 }
 window.addEventListener('resize', () => requestAnimationFrame(adattaSchede));
+
+// ---------- Tema Fluo: una sola luce che percorre i bordi delle schede ----------
+// Gira sempre in senso antiorario. Fa almeno un giro completo su una scheda, poi scendendo
+// lungo il lato sinistro passa a quella sotto. Dall'ultima risale lungo il lato destro,
+// scheda per scheda, fino alla prima, e il ciclo ricomincia.
+const luce = { el: null, pezzi: [], lung: 0, s: 0, prima: 0, raf: 0, firma: '' };
+const LUCE_VEL = 130;   // pixel al secondo
+const LUCE_RAGGIO = 10; // curva negli angoli, come gli angoli arrotondati delle schede
+
+function percorsoLuce() {
+  const vl = $('vista-lista');
+  const o = vl.getBoundingClientRect();
+  const R = [...vl.querySelectorAll('#lista .scheda')].map((s) => {
+    const r = s.getBoundingClientRect(), m = 1.5; // a metà dello spessore del bordo
+    return { L: r.left - o.left + m, R: r.right - o.left - m, T: r.top - o.top + m, B: r.bottom - o.top - m };
+  });
+  const n = R.length;
+  if (!n) return [];
+  const TL = (i) => [R[i].L, R[i].T], TR = (i) => [R[i].R, R[i].T];
+  const BL = (i) => [R[i].L, R[i].B], BR = (i) => [R[i].R, R[i].B];
+  if (n === 1) return [TR(0), TL(0), BL(0), BR(0)];
+  // Prima scheda: arriva da sotto (lato destro), fa il giro e scende lungo il lato sinistro.
+  const p = [BR(0), TR(0), TL(0), BL(0), BR(0), TR(0), TL(0), BL(0)];
+  // Schede di mezzo, in discesa: entra dall'angolo in alto a sinistra, giro, riscende.
+  for (let i = 1; i < n - 1; i++) p.push(TL(i), BL(i), BR(i), TR(i), TL(i), BL(i));
+  // Ultima scheda: giro completo, poi risale lungo il lato destro.
+  const u = n - 1;
+  p.push(TL(u), BL(u), BR(u), TR(u), TL(u), BL(u), BR(u), TR(u));
+  // Schede di mezzo, in salita: entra dall'angolo in basso a destra, giro, risale.
+  for (let i = n - 2; i >= 1; i--) p.push(BR(i), TR(i), TL(i), BL(i), BR(i), TR(i));
+  return p;
+}
+
+// Il percorso chiuso diventa una fila di tratti dritti e di quarti di cerchio negli angoli.
+function pezziLuce(pts, r) {
+  const n = pts.length, dir = [], pezzi = [];
+  for (let i = 0; i < n; i++) {
+    const a = pts[i], b = pts[(i + 1) % n], l = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
+    dir.push([(b[0] - a[0]) / l, (b[1] - a[1]) / l]);
+  }
+  const svolta = (i) => { const d1 = dir[(i - 1 + n) % n], d2 = dir[i]; return d1[0] * d2[1] - d1[1] * d2[0]; };
+  const taglio = pts.map((_, i) => (Math.abs(svolta(i)) > 0.5 ? r : 0));
+  for (let i = 0; i < n; i++) {
+    const a = pts[i], b = pts[(i + 1) % n], d = dir[i], j = (i + 1) % n;
+    const p = [a[0] + d[0] * taglio[i], a[1] + d[1] * taglio[i]];
+    const q = [b[0] - d[0] * taglio[j], b[1] - d[1] * taglio[j]];
+    const l = Math.hypot(q[0] - p[0], q[1] - p[1]);
+    if (l > 0.01) pezzi.push({ linea: true, p, q, l });
+    if (taglio[j]) {
+      const d2 = dir[j], c = [q[0] + d2[0] * r, q[1] + d2[1] * r];
+      pezzi.push({ c, a0: Math.atan2(q[1] - c[1], q[0] - c[0]), verso: Math.sign(svolta(j)), r, l: Math.PI * r / 2 });
+    }
+  }
+  return pezzi;
+}
+
+function puntoLuce(s) {
+  for (const k of luce.pezzi) {
+    if (s <= k.l) {
+      if (k.linea) { const f = s / k.l; return [k.p[0] + (k.q[0] - k.p[0]) * f, k.p[1] + (k.q[1] - k.p[1]) * f]; }
+      const a = k.a0 + k.verso * (s / k.r);
+      return [k.c[0] + k.r * Math.cos(a), k.c[1] + k.r * Math.sin(a)];
+    }
+    s -= k.l;
+  }
+  return luce.pezzi.length ? (luce.pezzi[0].p || [0, 0]) : [0, 0];
+}
+
+function disegnaLuce() {
+  const [x, y] = puntoLuce(luce.s);
+  luce.el.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
+}
+
+function passoLuce(t) {
+  const dt = luce.prima ? Math.min(t - luce.prima, 100) / 1000 : 0;
+  luce.prima = t;
+  luce.s = (luce.s + dt * LUCE_VEL) % luce.lung;
+  disegnaLuce();
+  luce.raf = requestAnimationFrame(passoLuce);
+}
+
+// Accende, ricalcola o spegne la luce: solo nel tema Fluo e solo nell'elenco delle idee.
+function aggiornaLuce() {
+  const vl = $('vista-lista');
+  if (!vl) return;
+  const attiva = document.documentElement.dataset.tema === 'fluo' && !vl.hidden && vl.querySelector('#lista .scheda');
+  if (!attiva) { cancelAnimationFrame(luce.raf); luce.raf = 0; if (luce.el) luce.el.hidden = true; return; }
+  if (!luce.el) { luce.el = el('div', 'luce-fluo'); luce.el.setAttribute('aria-hidden', 'true'); vl.append(luce.el); }
+  luce.el.hidden = false;
+  const pts = percorsoLuce();
+  const firma = JSON.stringify(pts.map((q) => q.map(Math.round)));
+  if (firma !== luce.firma) {
+    const vecchia = luce.lung ? luce.s / luce.lung : 0;
+    luce.pezzi = pezziLuce(pts, LUCE_RAGGIO);
+    luce.lung = luce.pezzi.reduce((t, k) => t + k.l, 0) || 1;
+    // Cambiano le schede (altra pagina, ricerca): si riparte dalla prima. Cambia solo la misura: si resta al punto.
+    luce.s = luce.firma && firma.split('],[').length === luce.firma.split('],[').length ? vecchia * luce.lung : 0;
+    luce.firma = firma;
+  }
+  disegnaLuce();
+  if (!luce.raf && !matchMedia('(prefers-reduced-motion: reduce)').matches) { luce.prima = 0; luce.raf = requestAnimationFrame(passoLuce); }
+}
 
 function disegnaOpere() {
   const opere = leggi('opere', []);
@@ -530,6 +633,7 @@ function vista(nome) {
   if (nome === 'nuova') { mostra('esito', ''); setTimeout(() => $('testo').focus(), 50); }
   if (nome === 'dettaglio') { requestAnimationFrame(scorriInFondo); mostra('oss-esito', ''); $('oss-testo').value = leggi('bozza-oss-' + ideaAperta, ''); }
   window.scrollTo(0, 0);
+  aggiornaLuce();
 }
 
 // ---------- Azioni ----------
@@ -672,6 +776,7 @@ function applicaTema(t) {
   document.querySelectorAll('#tema button').forEach((b) => b.classList.toggle('scelta', b.dataset.t === t));
   $('personale-box').hidden = t !== 'personale';
   applicaPersonale();
+  aggiornaLuce();
 }
 
 // ---------- Tema Personale: un'immagine scelta dal telefono ----------
