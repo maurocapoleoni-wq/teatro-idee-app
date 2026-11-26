@@ -526,3 +526,22 @@ header, .icona, .modifica-testata { color: var(--testo-testata); }
 :root[data-tema="personale"] #vista-dettaglio .osservazioni li.spett.dramm { background: rgba(21,39,42,var(--schede-personale,.8)); }
 :root[data-tema="personale"] #vista-dettaglio main { text-shadow: 0 1px 2px #000, 0 0 6px rgba(0,0,0,.85); }
 :root[data-tema="personale"] #vista-dettaglio .modifica-box textarea { text-shadow: none; }
+
+/* ---- v45: Fluo, bordo arcobaleno con un puntino di luce che gira in senso antiorario ---- */
+@property --giro { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+:root[data-tema="fluo"] .scheda {
+  border: 3px solid transparent;
+  background:
+    linear-gradient(var(--carta), var(--carta)) padding-box,
+    conic-gradient(from var(--giro), #fff 0deg, rgba(255,255,255,.85) 3deg, transparent 11deg 349deg, rgba(255,255,255,.85) 357deg) border-box,
+    conic-gradient(#ff1744, #ff9100, #ffea00, #39ff14, #00e5ff, #2979ff, #d500f9, #ff1744) border-box;
+  box-shadow: 0 0 9px rgba(255,43,214,.3), 0 0 9px rgba(0,229,255,.2) inset;
+  animation: fluo-giro 6s linear infinite;
+}
+/* l'angolo diminuisce: il puntino gira in senso antiorario */
+@keyframes fluo-giro { from { --giro: 360deg; } to { --giro: 0deg; } }
+/* schede sfasate, così i puntini non camminano tutti in fila */
+:root[data-tema="fluo"] #vista-lista .scheda:nth-child(2) { animation-delay: -1.5s; }
+:root[data-tema="fluo"] #vista-lista .scheda:nth-child(3) { animation-delay: -3s; }
+:root[data-tema="fluo"] #vista-lista .scheda:nth-child(4) { animation-delay: -4.5s; }
+@media (prefers-reduced-motion: reduce) { :root[data-tema="fluo"] .scheda { animation: none; } }
